@@ -30,6 +30,15 @@ MBD-LMs target **Multi-Block Diffusion (MultiBD)**, where a bounded running-set 
 
 ---
 
+## Quick Start
+
+### 1. [Training Setup](docs/guidelines/training_setup.md)
+### 2. [Inference Setup](docs/guidelines/inference_setup.md)
+### 3. [Start Training](docs/guidelines/train.md)
+### 4. [Run Benchmarks](docs/guidelines/benchmark.md)
+
+---
+
 ## Highlights
 
 - **Multi-Block Diffusion formulation.**  
@@ -101,15 +110,6 @@ Throughput is measured for single-sample decoding on two H100 GPUs with tensor p
 | MBD-LLaDA2-Mini-DMax | 9.34 | 11.20 ms | 926.67 |
 
 The larger Block Buffer increases per-step latency, but the gain in useful tokens committed per forward pass leads to higher realized throughput.
-
----
-
-## Quick Start
-
-### 1. [Training Setup](docs/guidelines/training_setup.md)
-### 2. [Inference Setup](docs/guidelines/inference_setup.md)
-### 3. [Start Training](docs/guidelines/train.md)
-### 4. [Run Benchmarks](docs/guidelines/benchmark.md)
 
 ---
 
