@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Project page for Multi-Block Diffusion Language Models.">
+  <title>Multi-Block Diffusion Language Models</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="labline"><span class="labmark">DL</span> DENG Lab</div>
+      <h1>Multi-Block Diffusion Language Models</h1>
+      <p class="subtitle">Aligning Block Diffusion Language Models with practical Multi-Block Diffusion through Multi-block Teacher Forcing and an optimized Block Buffer inference engine.</p>
+      <p class="authors">Yijie Jin, Jiajun Xu, Yuxuan Liu, Chenkai Xu, Yi Tu, Jiajun Li, Dandan Tu, Xiaohui Ye, Kai Yu, Pengfei Liu, Zhijie Deng</p>
+      <p class="affiliations">Shanghai Jiao Tong University &nbsp; | &nbsp; Xi'an Jiao Tong University &nbsp; | &nbsp; Huawei</p>
+      <div class="actions">
+        <a class="button" href="https://github.com/SJTU-DENG-Lab/mbd-lms">Code</a>
+        <a class="button secondary" href="https://sjtu-deng-lab.github.io/blogs/mbd/">Lab Blog</a>
+        <span class="button disabled" aria-disabled="true">Paper Coming Soon</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav" aria-label="Page navigation">
+    <div class="container">
+      <a href="#tldr">TL;DR</a>
+      <a href="#motivation">Motivation</a>
+      <a href="#formulation">MBD-LMs</a>
+      <a href="#multitf">MultiTF</a>
+      <a href="#block-buffer">Block Buffer</a>
+      <a href="#results">Results</a>
+      <a href="#throughput">Throughput</a>
+      <a href="#code">Code</a>
+      <a href="#citation">Citation</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section id="tldr">
+      <h2>TL;DR</h2>
+      <p>Block Diffusion Language Models (BD-LMs) make diffusion-based text generation more practical by supporting KV caching and flexible-length generation. However, native BD-LMs usually perform <strong>Single-Block Diffusion (SingleBD)</strong>: each forward pass refines one noisy block conditioned on a clean cached prefix. This preserves the serving benefits of BD-LMs, but blocks are still processed sequentially.</p>
+      <p>We propose <strong>Multi-Block Diffusion Language Models (MBD-LMs)</strong>, a formulation and post-training recipe for reliable <strong>Multi-Block Diffusion (MultiBD)</strong>. The key idea is to decode a bounded running-set of consecutive blocks concurrently, while training the model on states that resemble this practical inference regime. MBD-LMs are obtained by <strong>Multi-block Teacher Forcing (MultiTF)</strong> and served with an optimized <strong>Block Buffer</strong> inference engine.</p>
+      <p>Empirically, <strong>MBD-LLaDA2-Mini</strong> increases average Tokens Per Forward pass (TPF) from <strong>3.47 to 6.19</strong> and improves average accuracy from <strong>79.95% to 81.03%</strong>. When combined with DMax, <strong>MBD-LLaDA2-Mini-DMax</strong> reaches an average TPF of <strong>9.34</strong> with only a <strong>1.02 percentage-point</strong> average accuracy drop on math and code benchmarks.</p>
+      <figure class="figure noborder">
+        <img src="assets/fig1_singlebd_vs_multibd.png" alt="SingleBD versus MultiBD">
+        <figcaption><strong>Figure 1.</strong> SingleBD decodes blocks sequentially and creates KV-cache storing bubbles. MultiBD overlaps future-block refinement with KV-cache storing of completed blocks, enabling inter-block parallelism.</figcaption>
+      </figure>
+    </section>
+
+    <section id="motivation">
+      <h2>From SingleBD to MultiBD</h2>
+      <p>Diffusion Language Models (DLMs) generate text through iterative denoising and naturally support parallel token refinement. Fully bidirectional DLMs, however, are difficult to serve efficiently because they do not naturally support KV caching or dynamic-length generation. BD-LMs address this issue by generating text in block-causal form: completed blocks become a clean cached prefix, and the current block is denoised under block-causal attention.</p>
+      <p>This design gives native BD-LMs efficient <strong>intra-block</strong> parallelism, but not <strong>inter-block</strong> parallelism. In SingleBD, a later block cannot begin refinement until the current block has finished decoding and has been committed to the KV cache. The result is a storing bubble: during cache storing, no new token is generated and no decode-store overlap is exploited.</p>
+      <p>MultiBD removes this bottleneck by maintaining a small running-set of consecutive blocks. Earlier blocks in the running-set may be completed and waiting to enter the cache, while later blocks can already be active noisy blocks. This enables the model to refine future blocks while completed blocks are being committed to the KV cache.</p>
+
+      <h3>Why training-free MultiBD is not enough</h3>
+      <p>A natural question is whether existing BD-LMs can simply run MultiBD at inference time. The paper shows that this is only partially effective. Direct MultiBD inference increases TPF, confirming that multi-block decoding relaxes the single-block bottleneck, but it can degrade accuracy because the model was not trained on practical MultiBD states.</p>
+      <p>The mismatch has two components. First, practical MultiBD does not decode an unbounded noisy suffix. It uses a <strong>bounded running-set</strong>, often with an active part around two blocks and occasional expansion to three or four active blocks. Second, active slots can have <strong>heterogeneous mask-ratio patterns</strong>: adjacent slots may differ substantially in noise level. Reliable MultiBD therefore requires training states that match both the bounded running-set structure and the slot-wise noise patterns observed during inference.</p>
+      <figure class="figure">
+        <img src="assets/fig2_alignment_stats.png" alt="Train-inference statistics for MultiBD">
+        <figcaption><strong>Figure 2.</strong> Train-inference statistics for MultiBD. D2F-style schedules, chain-uniform MultiTF schedules, inference-time mask ratios, and active-block trajectories reveal the bounded and heterogeneous nature of practical MultiBD inference.</figcaption>
+      </figure>
+    </section>
+
+    <section id="formulation">
+      <h2>MBD-LMs: A Running-Set View of BD-LMs</h2>
+      <p>MBD-LMs formulate BD-LM generation around a <strong>running-set</strong> of consecutive blocks. At decoding step <code>s</code>, the running-set contains the blocks that have not yet entered the prefix KV cache. It includes active noisy blocks and completed preceding blocks waiting to be cached. Blocks before the running-set form the clean cached prefix.</p>
+      <p>This view unifies several regimes. Teacher-Forcing-trained BD-LMs correspond to the SingleBD extreme, where the model observes one noisy block conditioned on a clean cached prefix. D2F introduces visibility among multiple noisy blocks, but its training states still differ from practical MultiBD in running-set size and slot-wise noise patterns. Practical MultiBD is the bounded intermediate regime: the running-set should be larger than one to expose inter-block parallelism, but small enough to keep each forward pass efficient.</p>
+      <figure class="figure">
+        <img src="assets/fig3_train_inference_paradigms.png" style="width:72%;" alt="Train-inference alignment across paradigms">
+        <figcaption><strong>Figure 3.</strong> TF and D2F provide existing BD-LM training states, but neither directly matches practical MultiBD. MultiTF builds inference-like noise-groups with heterogeneous slot-wise noise patterns.</figcaption>
+      </figure>
+    </section>
+
+    <section id="multitf">
+      <h2>MultiTF: Post-Training BD-LMs for MultiBD</h2>
+      <p><strong>Multi-block Teacher Forcing (MultiTF)</strong> turns BD-LMs into MBD-LMs by constructing training states that resemble practical MultiBD inference. Instead of corrupting only one block as in standard teacher forcing, MultiTF corrupts a bounded group of consecutive blocks, called a <strong>noise-group</strong>, while conditioning later groups on clean earlier groups.</p>
+      <div class="grid">
+        <div class="card"><h3>Noise-group layouts</h3><p>Systematic layouts enumerate group sizes and shifts so that blocks appear at different group-relative positions. Random layouts add non-regular group-size combinations and boundary patterns.</p></div>
+        <div class="card"><h3>Chain-uniform scheduling</h3><p>Within each noise-group, mask ratios are sampled monotonically but randomly, producing larger and more diverse slot-wise noise gaps than a fixed D2F-style monotonic schedule.</p></div>
+        <div class="card"><h3>Dual-stream masking</h3><p>Noisy blocks inside the same noise-group can attend to each other under block-causal visibility, each noise-group can condition on its clean prefix, and clean tokens are prevented from attending to noisy tokens.</p></div>
+      </div>
+      <p>The resulting inputs are used for masked-token cross-entropy, and model-specific objectives such as DMax OPUT can be applied on top of the same MultiTF input construction.</p>
+      <figure class="figure">
+        <img src="assets/fig4_multitf_overview.png" alt="Overview of MultiTF">
+        <figcaption><strong>Figure 4.</strong> MultiTF constructs systematic and random noise-group layouts, applies a Group-Aware Dual-Stream Mask, and post-trains BD-LMs into MBD-LMs.</figcaption>
+      </figure>
+    </section>
+
+    <section id="block-buffer">
+      <h2>Optimized MultiBD with Block Buffer</h2>
+      <p>MultiBD is useful only if the additional parallelism can be translated into wall-clock speedup. A naive implementation directly materializes the current running-set as the physical input to each forward pass. This exposes inter-block parallelism, but the number of processed tokens changes over time and across requests, making CUDA Graph capture and replay difficult.</p>
+      <p>To make MultiBD practically executable, the paper introduces the <strong>Block Buffer</strong> mechanism. A Block Buffer contains a fixed number of physical block slots. Real resident blocks inside the buffer form the logical running-set, while trailing dummy slots reserve capacity for future blocks. A future block enters decoding by activating an existing dummy slot instead of extending the physical input sequence. When the front block is completed, it is committed to the KV cache and the buffer slides forward by appending a new dummy slot at the tail.</p>
+      <p>Each slot follows the state transition <strong>dummy -&gt; active -&gt; to-cache -&gt; in-cache</strong>. This design preserves prefix-cache reuse, keeps input shapes static, overlaps decoding with KV-cache storing, and supports CUDA Graph replay.</p>
+      <figure class="figure">
+        <img src="assets/fig5_block_buffer.png" alt="Block Buffer inference pipeline">
+        <figcaption><strong>Figure 5.</strong> MultiBD inference with Block Buffer. A fixed block-buffer hierarchy enables parallel block refinement while preserving prefix-cache semantics and static-shape execution.</figcaption>
+      </figure>
+    </section>
+
+    <section id="results">
+      <h2>Main Results</h2>
+      <p>The experiments evaluate mathematical reasoning on GSM8K and MATH500, and code generation on MBPP+ and HumanEval+. The paper reports Accuracy, Tokens Per Forward pass (TPF), and Accuracy Under Parallelism (AUP), where TPF measures decoding parallelism and AUP summarizes the accuracy-parallelism trade-off.</p>
+      <p>The main trend is consistent across models: MBD-LMs substantially improve TPF over native SingleBD, and MultiTF often recovers or improves the quality lost by training-free MultiBD. On LLaDA2-Mini, MultiTF raises average accuracy from <strong>78.59%</strong> under training-free MultiBD to <strong>81.03%</strong>, while further increasing average TPF from <strong>4.41</strong> to <strong>6.19</strong>. On SDAR-8B-Chat-b32, MBD-SDAR-8B-Chat-b32 increases average TPF from <strong>2.54</strong> to <strong>4.46</strong> and improves average accuracy from <strong>69.00%</strong> to <strong>69.74%</strong>.</p>
+      <figure class="figure">
+        <img src="assets/table1_main_results.png" alt="Main evaluation results">
+        <figcaption><strong>Table 1.</strong> Evaluation results across math and code benchmarks. MBD-LMs consistently improve TPF over SingleBD and improve the accuracy-parallelism trade-off in most settings.</figcaption>
+      </figure>
+      <p>Ablations further support the training-state alignment story. Combining systematic and random layouts gives the best AUP among the layout variants. Replacing the chain-uniform scheduler with other schedulers reduces the accuracy-parallelism trade-off; in particular, the D2F-style monotonic scheduler causes a large accuracy drop in the reported ablation, indicating that noisy-block visibility alone is not sufficient when slot-wise noise patterns are mismatched.</p>
+      <figure class="figure">
+        <img src="assets/table2_transfer_ablation.png" alt="Transfer and ablation results">
+        <figcaption><strong>Table 2.</strong> Training-free MultiBD transfers to additional model variants, while MultiTF component ablations show the role of layout construction and chain-uniform scheduling.</figcaption>
+      </figure>
+    </section>
+
+    <section id="throughput">
+      <h2>Throughput: From TPF to TPS</h2>
+      <p>Higher TPF does not automatically imply proportional wall-clock speedup because MultiBD processes a larger static Block Buffer at each forward pass. The paper therefore separates useful committed tokens from the per-step computational workload. Increasing the buffer size can improve throughput when the useful-token gain outweighs the extra per-step cost introduced by resident blocks and dummy slots.</p>
+      <p>On the H100 TP=2 setup reported in Table 3, MBD-LLaDA2-Mini increases average TPF from <strong>3.47</strong> to <strong>6.19</strong> while step latency rises from <strong>7.07 ms</strong> to <strong>8.78 ms</strong>. The measured average TPS increases from <strong>517.16</strong> to <strong>745.92</strong>. With DMax, MBD-LLaDA2-Mini-DMax increases average TPF from <strong>6.35</strong> to <strong>9.34</strong>, and average TPS rises from <strong>779.49</strong> to <strong>926.67</strong> in the same table.</p>
+      <figure class="figure">
+        <img src="assets/table3_throughput.png" alt="Throughput and latency results">
+        <figcaption><strong>Table 3.</strong> Throughput and single-step latency comparison on two H100 GPUs with TP=2. MultiBD improves realized TPS despite increasing per-step latency.</figcaption>
+      </figure>
+    </section>
+
+    <section id="code" class="compact">
+      <h2>Code Release</h2>
+      <p class="note">The implementation is in preparation. Unknown installation, inference, training, and evaluation commands are intentionally left as TODO placeholders in the repository README.</p>
+      <pre><code>git clone https://github.com/SJTU-DENG-Lab/mbd-lms.git
+cd mbd-lms
+# TODO: add installation commands
+# TODO: add inference and evaluation commands</code></pre>
+    </section>
+
+    <section id="citation" class="compact">
+      <h2>Citation</h2>
+      <p>The current draft does not include an official BibTeX entry. Please add the official citation after the paper is publicly released.</p>
+      <pre><code>% TODO: add official BibTeX after release</code></pre>
+      <h3>References</h3>
+      <ol>
+        <li>Marianne Arriola et al. <em>Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models</em>. ICLR, 2025.</li>
+        <li>Tiwei Bie et al. <em>LLaDA2.0: Scaling Up Diffusion Language Models to 100B</em>. arXiv preprint, 2025.</li>
+        <li>Xu Wang et al. <em>Diffusion LLMs Can Do Faster-than-AR Inference via Discrete Diffusion Forcing</em>. arXiv preprint, 2025.</li>
+        <li>Zigeng Chen et al. <em>DMax: Aggressive Parallel Decoding for dLLMs</em>. arXiv preprint, 2026.</li>
+        <li>Shuang Cheng et al. <em>SDAR: A Synergistic Diffusion-Autoregression Paradigm for Scalable Sequence Generation</em>. arXiv preprint, 2025.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      Multi-Block Diffusion Language Models. Project page for <a href="https://github.com/SJTU-DENG-Lab/mbd-lms">SJTU-DENG-Lab/mbd-lms</a>.
+    </div>
+  </footer>
+</body>
+</html>
