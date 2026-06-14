@@ -36,3 +36,6 @@ Thumbs.db
 # Editors
 .vscode/
 .idea/
+
+# Cutomized
+dataset/*.jsonl

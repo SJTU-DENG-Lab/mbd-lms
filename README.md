@@ -104,91 +104,16 @@ The larger Block Buffer increases per-step latency, but the gain in useful token
 
 ---
 
-## Installation
-
-The implementation will be released in this repository.
-
-```bash
-git clone https://github.com/SJTU-DENG-Lab/mbd-lms.git
-cd mbd-lms
-
-# TODO: install dependencies after code release
-# pip install -r requirements.txt
-# pip install -e .
-```
-
----
-
 ## Quick Start
 
-The following commands are placeholders and will be updated after the code release.
-
-### Inference
-
-```bash
-# TODO: add inference command
-# python scripts/infer.py \
-#   --model <checkpoint_path> \
-#   --method multibd \
-#   --buffer-size <buffer_size> \
-#   --block-size <block_size> \
-#   --prompt "..."
-```
-
-### Evaluation
-
-```bash
-# TODO: add evaluation command
-# python scripts/evaluate.py \
-#   --model <checkpoint_path> \
-#   --benchmarks gsm8k math500 mbpp_plus humaneval_plus \
-#   --method multibd
-```
-
-### MultiTF Post-training
-
-```bash
-# TODO: add MultiTF post-training command
-# torchrun --nproc_per_node=<num_gpus> scripts/train_multitf.py \
-#   --base-model <base_model_path> \
-#   --output-dir <output_dir>
-```
-
----
-
-## Checkpoints
-
-Checkpoints will be added after release.
-
-| Model | Status |
-|---|---|
-| MBD-LLaDA2-Mini | TODO |
-| MBD-LLaDA2-Mini-DMax | TODO |
-| MBD-SDAR-8B-Chat-b32 | TODO |
-| MBD-SDAR-8B-Chat-b4 | TODO |
-
----
-
-## Citation
-
-Please cite our work if you find this repository useful.
-
-```bibtex
-TODO: Add official BibTeX after the paper is publicly released.
-```
-
----
-
-## Contact
-
-For questions, please contact:
-
-```text
-Zhijie Deng: zhijied@sjtu.edu.cn
-```
+### 1. [Training Setup](docs/guidelines/training_setup.md)
+### 2. [Inference Setup](docs/guidelines/inference_setup.md)
+### 3. [Start Training](docs/guidelines/train.md)
+### 4. [Run Benchmarks](docs/guidelines/benchmark.md)
 
 ---
 
 ## License
 
-TODO: Add license information.
+See [LICENSE](LICENSE).
+
