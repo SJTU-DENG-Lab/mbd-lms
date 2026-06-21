@@ -67,8 +67,8 @@ torchrun \
     --node_rank=0 \
     --master_addr=localhost \
     --master_port=29500 \
-    mbd_lm/tasks/sdar/train_llada2_multi_tf_oput.py \
-    mbd_lm/configs/sft/sdar/train_llada2_multi_tf_oput_code_b32.yaml
+    mbd_lm/tasks/llada2/train_llada2_multi_tf_oput.py \
+    mbd_lm/configs/sft/llada2/train_llada2_multi_tf_oput_code_b32.yaml
 ```
 
 | Note | Single-GPU is only suitable for verifying configs parse correctly. Full training is prohibitively slow and will not produce usable results |
