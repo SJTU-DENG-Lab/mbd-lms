@@ -8,6 +8,9 @@
   --accent: #0f766e;
   --accent-dark: #115e59;
   --soft: #e8f5f3;
+  --engine: #2563eb;
+  --engine-dark: #1d4ed8;
+  --engine-soft: #eff6ff;
   --code: #f3f4f6;
   --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
@@ -112,6 +115,17 @@ h1 {
 .button.secondary {
   background: white;
   color: var(--accent-dark);
+}
+
+.button.engine {
+  border-color: var(--engine);
+  background: var(--engine);
+  color: white;
+}
+
+.button.engine.secondary {
+  background: white;
+  color: var(--engine-dark);
 }
 
 .button.disabled {
@@ -244,11 +258,17 @@ figcaption {
   margin-top: 0;
 }
 
-.training-section,
-.engine-section {
+.training-section {
   border-color: rgba(15, 118, 110, 0.28);
   background:
     linear-gradient(180deg, #f8fffd 0%, #ffffff 58%),
+    var(--panel);
+}
+
+.engine-section {
+  border-color: rgba(37, 99, 235, 0.3);
+  background:
+    linear-gradient(180deg, #f6f9ff 0%, #ffffff 58%),
     var(--panel);
 }
 
@@ -264,6 +284,11 @@ figcaption {
   font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+.engine-kicker {
+  background: var(--engine-soft);
+  color: var(--engine-dark);
 }
 
 .section-lede,
@@ -304,6 +329,11 @@ figcaption {
 
 .engine-card {
   background: white;
+}
+
+.engine-card h3,
+.engine-section a {
+  color: var(--engine-dark);
 }
 
 .engine-actions {
