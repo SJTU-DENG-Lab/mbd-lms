@@ -10,19 +10,24 @@
   <a href="#">
     <img src="https://img.shields.io/badge/Paper-Coming%20Soon-lightgrey" alt="Paper">
   </a>
-  <a href="https://github.com/SJTU-DENG-Lab/mbd-lms">
-    <img src="https://img.shields.io/badge/Code-Coming%20Soon-lightgrey" alt="Code">
+  <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">
+    <img src="https://img.shields.io/badge/Reproduce-Diffulex%20mbd--lms-blue" alt="Reproduction Branch">
+  </a>
+  <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">
+    <img src="https://img.shields.io/badge/Engine-Diffulex%20main-green" alt="Diffulex Engine">
   </a>
   <a href="#license">
     <img src="https://img.shields.io/badge/License-TODO-lightgrey" alt="License">
   </a>
 </p>
 
-This repository will host the official implementation of **Multi-Block Diffusion Language Models (MBD-LMs)**.
+This repository documents the training recipe and paradigm definition for **Multi-Block Diffusion Language Models (MBD-LMs)**.
 
 Block Diffusion Language Models (BD-LMs) support KV caching and flexible-length generation, but native BD-LMs usually decode with **Single-Block Diffusion (SingleBD)**: each forward pass refines one noisy block while later blocks wait for the current block to be completed and cached. This creates KV-cache storing bubbles and leaves inter-block parallelism underused.
 
 MBD-LMs target **Multi-Block Diffusion (MultiBD)**, where a bounded running-set of consecutive blocks is decoded concurrently. We introduce **Multi-block Teacher Forcing (MultiTF)** for train-inference alignment and a **Block Buffer** inference mechanism for efficient static-shape execution.
+
+The runtime engine for this work is **Diffulex**. To reproduce the reported MBD-LMs experiments, use the Diffulex [`mbd-lms`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms) branch. To develop the engine further, contribute new runtime features, or explore new decoding algorithms and make them practical, use the Diffulex [`main`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/main) branch.
 
 <p align="center">
   <img src="docs/assets/fig1_singlebd_vs_multibd.png" alt="SingleBD vs MultiBD" width="88%">
@@ -36,6 +41,21 @@ MBD-LMs target **Multi-Block Diffusion (MultiBD)**, where a bounded running-set 
 ### 2. [Inference Setup](docs/guidelines/inference_setup.md)
 ### 3. [Start Training](docs/guidelines/train.md)
 ### 4. [Run Benchmarks](docs/guidelines/benchmark.md)
+
+For reproduction and inference commands, start from the Diffulex `mbd-lms`
+branch:
+
+```bash
+git clone https://github.com/SJTU-DENG-Lab/Diffulex.git
+cd Diffulex
+git checkout mbd-lms
+```
+
+For ongoing engine development, use:
+
+```bash
+git checkout main
+```
 
 ---
 
@@ -116,4 +136,3 @@ The larger Block Buffer increases per-step latency, but the gain in useful token
 ## License
 
 See [LICENSE](LICENSE).
-
