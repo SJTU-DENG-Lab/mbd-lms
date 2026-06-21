@@ -20,23 +20,30 @@
     <img src="https://img.shields.io/badge/Engine-Diffulex%20main-green" alt="Diffulex Engine">
   </a>
   <a href="#license">
-    <img src="https://img.shields.io/badge/License-TODO-lightgrey" alt="License">
+    <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
   </a>
 </p>
 
-This repository is the **training and method repository** for **Multi-Block Diffusion Language Models (MBD-LMs)**. It contains the MultiTF training code, training configs, data preparation notes, checkpoint conversion utilities, and the project page that defines the MBD-LMs paradigm.
+This repository is the **training and method repository** for **Multi-Block Diffusion Language Models (MBD-LMs)**. It defines the paradigm and contains the training-side assets needed to build MBD-LMs:
+
+- Multi-block Teacher Forcing (MultiTF) training code and configs;
+- dataset preparation and training setup guidelines;
+- multi-node training launch scripts;
+- checkpoint conversion utilities;
+- the project page and method documentation.
 
 Block Diffusion Language Models (BD-LMs) support KV caching and flexible-length generation, but native BD-LMs usually decode with **Single-Block Diffusion (SingleBD)**: each forward pass refines one noisy block while later blocks wait for the current block to be completed and cached. This creates KV-cache storing bubbles and leaves inter-block parallelism underused.
 
 MBD-LMs target **Multi-Block Diffusion (MultiBD)**, where a bounded running-set of consecutive blocks is decoded concurrently. We introduce **Multi-block Teacher Forcing (MultiTF)** for train-inference alignment and a **Block Buffer** inference mechanism for efficient static-shape execution.
 
-The repository roles are split intentionally:
+The repository roles are split intentionally. Use the training repository for
+model-side work, and use Diffulex for inference and systems work:
 
 | Repository / branch | Role |
 |---|---|
 | [`SJTU-DENG-Lab/mbd-lms`](https://github.com/SJTU-DENG-Lab/mbd-lms) | Training and method repository: MultiTF, training configs, dataset setup, checkpoint conversion, and paper/project documentation. |
 | Diffulex [`mbd-lms`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms) | Experiment reproduction branch for running the reported MBD-LMs inference/evaluation setup. |
-| Diffulex [`main`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/main) | Active inference engine branch for runtime development, open-source contributions, and new decoding algorithms. |
+| Diffulex [`main`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/main) | Active inference engine branch for runtime development, open-source contributions, and new dLLM decoding algorithms. |
 
 <p align="center">
   <img src="docs/assets/fig1_singlebd_vs_multibd.png" alt="SingleBD vs MultiBD" width="88%">
@@ -46,22 +53,27 @@ The repository roles are split intentionally:
 
 ## Quick Start
 
-For training and method work, start in this repository:
+### Training and Method Work
+
+Start from this repository when you are working on MultiTF training, data
+preparation, or checkpoint conversion:
 
 ```bash
 git clone https://github.com/SJTU-DENG-Lab/mbd-lms.git
 cd mbd-lms
 ```
 
-Then follow:
+Then follow the guides:
 
-### 1. [Training Setup](docs/guidelines/training_setup.md)
-### 2. [Start Training](docs/guidelines/train.md)
-### 3. [Inference Setup](docs/guidelines/inference_setup.md)
-### 4. [Run Benchmarks](docs/guidelines/benchmark.md)
+1. [Training Setup](docs/guidelines/training_setup.md)
+2. [Start Training](docs/guidelines/train.md)
+3. [Inference Setup](docs/guidelines/inference_setup.md)
+4. [Run Benchmarks](docs/guidelines/benchmark.md)
 
-For reproduction and inference commands, start from the Diffulex `mbd-lms`
-branch:
+### Experiment Reproduction
+
+For the reported MBD-LMs inference/evaluation setup, use the Diffulex
+`mbd-lms` branch:
 
 ```bash
 git clone https://github.com/SJTU-DENG-Lab/Diffulex.git
@@ -69,7 +81,10 @@ cd Diffulex
 git checkout mbd-lms
 ```
 
-For ongoing engine development, use:
+### Engine Development
+
+For new runtime features, open-source contributions, and new dLLM decoding
+algorithms, use Diffulex `main`:
 
 ```bash
 git checkout main
@@ -153,4 +168,4 @@ The larger Block Buffer increases per-step latency, but the gain in useful token
 
 ## License
 
-See [LICENSE](LICENSE).
+This repository is released under the [MIT License](LICENSE).
