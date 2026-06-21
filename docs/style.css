@@ -244,6 +244,7 @@ figcaption {
   margin-top: 0;
 }
 
+.training-section,
 .engine-section {
   border-color: rgba(15, 118, 110, 0.28);
   background:
@@ -251,6 +252,7 @@ figcaption {
     var(--panel);
 }
 
+.section-kicker,
 .engine-kicker {
   display: inline-flex;
   margin-bottom: 12px;
@@ -264,10 +266,36 @@ figcaption {
   letter-spacing: 0.06em;
 }
 
+.section-lede,
 .engine-lede {
   max-width: 940px;
   font-size: 1.04rem;
   color: #334155;
+}
+
+.repo-flow,
+.engine-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.repo-flow > div,
+.engine-split > div {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  background: #fbfcfe;
+}
+
+.repo-flow h3,
+.engine-split h3 {
+  margin-top: 0;
+}
+
+.repo-flow .button {
+  margin-top: 4px;
 }
 
 .engine-grid {
@@ -276,24 +304,6 @@ figcaption {
 
 .engine-card {
   background: white;
-}
-
-.engine-split {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 20px;
-}
-
-.engine-split > div {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 18px;
-  background: #fbfcfe;
-}
-
-.engine-split h3 {
-  margin-top: 0;
 }
 
 .engine-actions {
@@ -352,6 +362,7 @@ footer {
   .grid {
     grid-template-columns: 1fr;
   }
+  .repo-flow,
   .engine-split {
     grid-template-columns: 1fr;
   }

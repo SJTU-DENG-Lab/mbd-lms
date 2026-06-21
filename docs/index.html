@@ -12,12 +12,13 @@
     <div class="container">
       <div class="labline"><span class="labmark">DL</span> DENG Lab</div>
       <h1>Multi-Block Diffusion Language Models</h1>
-      <p class="subtitle">Aligning Block Diffusion Language Models with practical Multi-Block Diffusion through Multi-block Teacher Forcing, then making the method runnable through the Diffulex inference engine.</p>
+      <p class="subtitle">A training recipe, paradigm definition, and runnable inference path for practical Multi-Block Diffusion Language Models.</p>
       <p class="authors">Yijie Jin, Jiajun Xu, Yuxuan Liu, Chenkai Xu, Yi Tu, Jiajun Li, Dandan Tu, Xiaohui Ye, Kai Yu, Pengfei Liu, Zhijie Deng</p>
       <p class="affiliations">Shanghai Jiao Tong University &nbsp; | &nbsp; Xi'an Jiao Tong University &nbsp; | &nbsp; Huawei</p>
       <div class="actions">
-        <a class="button" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex Engine</a>
+        <a class="button" href="https://github.com/SJTU-DENG-Lab/mbd-lms">Training Code</a>
         <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce</a>
+        <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex Engine</a>
         <a class="button secondary" href="https://sjtu-deng-lab.github.io/blogs/mbd/">Lab Blog</a>
         <span class="button disabled" aria-disabled="true">Paper Coming Soon</span>
       </div>
@@ -31,6 +32,7 @@
       <a href="#formulation">MBD-LMs</a>
       <a href="#multitf">MultiTF</a>
       <a href="#block-buffer">Block Buffer</a>
+      <a href="#training-code">Training Code</a>
       <a href="#engine">Engine</a>
       <a href="#results">Results</a>
       <a href="#throughput">Throughput</a>
@@ -44,7 +46,7 @@
       <h2>TL;DR</h2>
       <p>Block Diffusion Language Models (BD-LMs) make diffusion-based text generation more practical by supporting KV caching and flexible-length generation. However, native BD-LMs usually perform <strong>Single-Block Diffusion (SingleBD)</strong>: each forward pass refines one noisy block conditioned on a clean cached prefix. This preserves the serving benefits of BD-LMs, but blocks are still processed sequentially.</p>
       <p>We propose <strong>Multi-Block Diffusion Language Models (MBD-LMs)</strong>, a formulation and post-training recipe for reliable <strong>Multi-Block Diffusion (MultiBD)</strong>. The key idea is to decode a bounded running-set of consecutive blocks concurrently, while training the model on states that resemble this practical inference regime. MBD-LMs are obtained by <strong>Multi-block Teacher Forcing (MultiTF)</strong> and served with an optimized <strong>Block Buffer</strong> inference engine.</p>
-      <p>The executable runtime is <strong>Diffulex</strong>: use the Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms"><code>mbd-lms</code></a> branch for experiment reproduction, and Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main"><code>main</code></a> for engine development and new decoding algorithms.</p>
+      <p>The training and method code lives in <strong>SJTU-DENG-Lab/mbd-lms</strong>. The executable inference runtime is <strong>Diffulex</strong>: use the Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms"><code>mbd-lms</code></a> branch for experiment reproduction, and Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main"><code>main</code></a> for engine development and new decoding algorithms.</p>
       <p>Empirically, <strong>MBD-LLaDA2-Mini</strong> increases average Tokens Per Forward pass (TPF) from <strong>3.47 to 6.19</strong> and improves average accuracy from <strong>79.95% to 81.03%</strong>. When combined with DMax, <strong>MBD-LLaDA2-Mini-DMax</strong> reaches an average TPF of <strong>9.34</strong> with only a <strong>1.02 percentage-point</strong> average accuracy drop on math and code benchmarks.</p>
       <figure class="figure noborder">
         <img src="assets/fig1_singlebd_vs_multibd.png" alt="SingleBD versus MultiBD">
@@ -101,6 +103,38 @@
         <img src="assets/fig5_block_buffer.png" alt="Block Buffer inference pipeline">
         <figcaption><strong>Figure 5.</strong> MultiBD inference with Block Buffer. A fixed block-buffer hierarchy enables parallel block refinement while preserving prefix-cache semantics and static-shape execution.</figcaption>
       </figure>
+    </section>
+
+    <section id="training-code" class="training-section">
+      <div class="section-kicker">Training Repository</div>
+      <h2>mbd-lms Defines and Trains MBD-LMs</h2>
+      <p class="section-lede">The <a href="https://github.com/SJTU-DENG-Lab/mbd-lms"><code>SJTU-DENG-Lab/mbd-lms</code></a> repository is the home for the method-side work. It is where Multi-block Teacher Forcing is implemented, where training configs live, and where checkpoints are prepared before they are evaluated through the Diffulex runtime.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>MultiTF training</h3>
+          <p>The repository contains the post-training path that constructs bounded noisy block groups, heterogeneous slot-wise mask ratios, and group-aware attention masks for practical MultiBD states.</p>
+        </div>
+        <div class="card">
+          <h3>Training assets</h3>
+          <p>Use this repo for environment setup, dataset preparation, model-specific training configs, multi-node launch scripts, and checkpoint conversion utilities.</p>
+        </div>
+        <div class="card">
+          <h3>Method documentation</h3>
+          <p>The project page, guidelines, and figures define the SingleBD-to-MultiBD transition, MultiTF, Block Buffer inference, and the reported training/evaluation setup.</p>
+        </div>
+      </div>
+      <div class="repo-flow">
+        <div>
+          <h3>Train and Prepare</h3>
+          <p>Start here when working on MBD-LM training, reproducing MultiTF data construction, or converting trained checkpoints into usable model artifacts.</p>
+          <a class="button" href="https://github.com/SJTU-DENG-Lab/mbd-lms">Open mbd-lms Training Repo</a>
+        </div>
+        <div>
+          <h3>Run and Serve</h3>
+          <p>Move to Diffulex when you need benchmark execution, HTTP serving, optimized kernels, prefix caching, and system-level MultiBD runtime behavior.</p>
+          <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Open Diffulex Reproduction Branch</a>
+        </div>
+      </div>
     </section>
 
     <section id="engine" class="engine-section">
@@ -163,14 +197,19 @@
     </section>
 
     <section id="code" class="compact">
-      <h2>Code and Engine</h2>
-      <p class="note">This repository documents the MBD-LMs training recipe and paradigm definition. The runtime engine is Diffulex.</p>
-      <p>To reproduce the reported MBD-LMs experiments, use the Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms"><code>mbd-lms</code></a> branch. To develop the engine further, contribute runtime features, or explore new decoding algorithms and make them practical, use Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main"><code>main</code></a>.</p>
-      <pre><code>git clone https://github.com/SJTU-DENG-Lab/Diffulex.git
-cd Diffulex
-git checkout mbd-lms  # reproduce MBD-LMs experiments
+      <h2>Code Paths</h2>
+      <p class="note">Use <code>mbd-lms</code> for training and method work; use Diffulex for inference, serving, and systems development.</p>
+      <pre><code># Training, MultiTF, datasets, configs, and checkpoint conversion
+git clone https://github.com/SJTU-DENG-Lab/mbd-lms.git
+cd mbd-lms
 
-git checkout main     # engine development and new algorithms</code></pre>
+# Reproduce reported MBD-LMs inference/evaluation
+git clone https://github.com/SJTU-DENG-Lab/Diffulex.git
+cd Diffulex
+git checkout mbd-lms
+
+# Active engine development and new algorithms
+git checkout main</code></pre>
     </section>
 
     <section id="citation" class="compact">
@@ -190,7 +229,7 @@ git checkout main     # engine development and new algorithms</code></pre>
 
   <footer>
     <div class="container">
-      Multi-Block Diffusion Language Models. Reproduce with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Diffulex mbd-lms</a>; develop with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex main</a>.
+      Multi-Block Diffusion Language Models. Train with <a href="https://github.com/SJTU-DENG-Lab/mbd-lms">mbd-lms</a>; reproduce with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Diffulex mbd-lms</a>; develop with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex main</a>.
     </div>
   </footer>
 </body>

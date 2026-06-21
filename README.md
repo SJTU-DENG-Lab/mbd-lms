@@ -10,6 +10,9 @@
   <a href="#">
     <img src="https://img.shields.io/badge/Paper-Coming%20Soon-lightgrey" alt="Paper">
   </a>
+  <a href="https://github.com/SJTU-DENG-Lab/mbd-lms">
+    <img src="https://img.shields.io/badge/Training%20Code-mbd--lms-0f766e" alt="MBD-LMs Training Code">
+  </a>
   <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">
     <img src="https://img.shields.io/badge/Reproduce-Diffulex%20mbd--lms-blue" alt="Reproduction Branch">
   </a>
@@ -21,13 +24,19 @@
   </a>
 </p>
 
-This repository documents the training recipe and paradigm definition for **Multi-Block Diffusion Language Models (MBD-LMs)**.
+This repository is the **training and method repository** for **Multi-Block Diffusion Language Models (MBD-LMs)**. It contains the MultiTF training code, training configs, data preparation notes, checkpoint conversion utilities, and the project page that defines the MBD-LMs paradigm.
 
 Block Diffusion Language Models (BD-LMs) support KV caching and flexible-length generation, but native BD-LMs usually decode with **Single-Block Diffusion (SingleBD)**: each forward pass refines one noisy block while later blocks wait for the current block to be completed and cached. This creates KV-cache storing bubbles and leaves inter-block parallelism underused.
 
 MBD-LMs target **Multi-Block Diffusion (MultiBD)**, where a bounded running-set of consecutive blocks is decoded concurrently. We introduce **Multi-block Teacher Forcing (MultiTF)** for train-inference alignment and a **Block Buffer** inference mechanism for efficient static-shape execution.
 
-The runtime engine for this work is **Diffulex**. To reproduce the reported MBD-LMs experiments, use the Diffulex [`mbd-lms`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms) branch. To develop the engine further, contribute new runtime features, or explore new decoding algorithms and make them practical, use the Diffulex [`main`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/main) branch.
+The repository roles are split intentionally:
+
+| Repository / branch | Role |
+|---|---|
+| [`SJTU-DENG-Lab/mbd-lms`](https://github.com/SJTU-DENG-Lab/mbd-lms) | Training and method repository: MultiTF, training configs, dataset setup, checkpoint conversion, and paper/project documentation. |
+| Diffulex [`mbd-lms`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms) | Experiment reproduction branch for running the reported MBD-LMs inference/evaluation setup. |
+| Diffulex [`main`](https://github.com/SJTU-DENG-Lab/Diffulex/tree/main) | Active inference engine branch for runtime development, open-source contributions, and new decoding algorithms. |
 
 <p align="center">
   <img src="docs/assets/fig1_singlebd_vs_multibd.png" alt="SingleBD vs MultiBD" width="88%">
@@ -37,9 +46,18 @@ The runtime engine for this work is **Diffulex**. To reproduce the reported MBD-
 
 ## Quick Start
 
+For training and method work, start in this repository:
+
+```bash
+git clone https://github.com/SJTU-DENG-Lab/mbd-lms.git
+cd mbd-lms
+```
+
+Then follow:
+
 ### 1. [Training Setup](docs/guidelines/training_setup.md)
-### 2. [Inference Setup](docs/guidelines/inference_setup.md)
-### 3. [Start Training](docs/guidelines/train.md)
+### 2. [Start Training](docs/guidelines/train.md)
+### 3. [Inference Setup](docs/guidelines/inference_setup.md)
 ### 4. [Run Benchmarks](docs/guidelines/benchmark.md)
 
 For reproduction and inference commands, start from the Diffulex `mbd-lms`
