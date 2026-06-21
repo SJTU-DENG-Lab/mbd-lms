@@ -222,6 +222,82 @@ h1 {
   color: var(--engine-dark);
 }
 
+.definition-band {
+  border-bottom: 1px solid var(--line);
+  background: #ffffff;
+}
+
+.definition-band .container {
+  padding: 18px 0;
+}
+
+.definition-head {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 14px;
+}
+
+.definition-head span {
+  color: var(--accent-dark);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.definition-head strong {
+  color: #111827;
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+
+.definition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.definition-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fbfcfe;
+}
+
+.definition-card p {
+  margin: 8px 0 0;
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 1.58;
+}
+
+.definition-card-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.model-definition {
+  border-color: rgba(15, 118, 110, 0.24);
+  background: #f8fffd;
+}
+
+.model-definition .definition-card-label {
+  color: var(--accent-dark);
+}
+
+.inference-definition {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: #f8fbff;
+}
+
+.inference-definition .definition-card-label {
+  color: var(--engine-dark);
+}
+
 main {
   padding: 34px 0 80px;
 }
@@ -465,6 +541,10 @@ footer {
   .engine-banner-actions,
   .engine-banner-actions .button {
     width: 100%;
+  }
+  .definition-head,
+  .definition-grid {
+    grid-template-columns: 1fr;
   }
   .grid {
     grid-template-columns: 1fr;
