@@ -12,12 +12,12 @@
     <div class="container">
       <div class="labline"><span class="labmark">DL</span> DENG Lab</div>
       <h1>Multi-Block Diffusion Language Models</h1>
-      <p class="subtitle">Aligning Block Diffusion Language Models with practical Multi-Block Diffusion through Multi-block Teacher Forcing and an optimized Block Buffer inference engine.</p>
+      <p class="subtitle">Aligning Block Diffusion Language Models with practical Multi-Block Diffusion through Multi-block Teacher Forcing, then making the method runnable through the Diffulex inference engine.</p>
       <p class="authors">Yijie Jin, Jiajun Xu, Yuxuan Liu, Chenkai Xu, Yi Tu, Jiajun Li, Dandan Tu, Xiaohui Ye, Kai Yu, Pengfei Liu, Zhijie Deng</p>
       <p class="affiliations">Shanghai Jiao Tong University &nbsp; | &nbsp; Xi'an Jiao Tong University &nbsp; | &nbsp; Huawei</p>
       <div class="actions">
-        <a class="button" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce</a>
-        <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Engine</a>
+        <a class="button" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex Engine</a>
+        <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce</a>
         <a class="button secondary" href="https://sjtu-deng-lab.github.io/blogs/mbd/">Lab Blog</a>
         <span class="button disabled" aria-disabled="true">Paper Coming Soon</span>
       </div>
@@ -31,6 +31,7 @@
       <a href="#formulation">MBD-LMs</a>
       <a href="#multitf">MultiTF</a>
       <a href="#block-buffer">Block Buffer</a>
+      <a href="#engine">Engine</a>
       <a href="#results">Results</a>
       <a href="#throughput">Throughput</a>
       <a href="#code">Code</a>
@@ -100,6 +101,40 @@
         <img src="assets/fig5_block_buffer.png" alt="Block Buffer inference pipeline">
         <figcaption><strong>Figure 5.</strong> MultiBD inference with Block Buffer. A fixed block-buffer hierarchy enables parallel block refinement while preserving prefix-cache semantics and static-shape execution.</figcaption>
       </figure>
+    </section>
+
+    <section id="engine" class="engine-section">
+      <div class="engine-kicker">Runtime Engine</div>
+      <h2>Diffulex Turns MultiBD into a Runnable System</h2>
+      <p class="engine-lede">MultiBD is not only a training or decoding idea. To make it useful, the inference engine must maintain a moving block buffer, reuse prefix KV cache, schedule active blocks, commit completed blocks, and keep execution shapes friendly to optimized kernels. Diffulex is the engine stack built for that job.</p>
+      <div class="grid engine-grid">
+        <div class="card engine-card">
+          <h3>Block-aware runtime</h3>
+          <p>Diffulex maps <code>decoding_strategy=multi_bd</code> to strategy-specific request state, scheduler, KV cache manager, model runner, and attention metadata.</p>
+        </div>
+        <div class="card engine-card">
+          <h3>Serving-oriented cache design</h3>
+          <p>The engine preserves a clean cached prefix, supports prefix reuse, and commits completed blocks while later blocks are already being refined.</p>
+        </div>
+        <div class="card engine-card">
+          <h3>Practical optimization path</h3>
+          <p>Diffulex integrates paged attention, CUDA Graph-friendly static execution, vLLM-backed layers, MoE paths, benchmark tooling, and HTTP serving.</p>
+        </div>
+      </div>
+      <div class="engine-split">
+        <div>
+          <h3>For Reproduction</h3>
+          <p>Use the Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms"><code>mbd-lms</code></a> branch to reproduce the reported MBD-LMs experiments. This branch keeps configs and runtime assumptions aligned with the paper setup.</p>
+        </div>
+        <div>
+          <h3>For New Systems Work</h3>
+          <p>Use Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main"><code>main</code></a> for engine development, open-source contributions, model support, kernel optimization, and new decoding algorithms that need to become real runnable systems.</p>
+        </div>
+      </div>
+      <div class="engine-actions">
+        <a class="button" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Explore Diffulex Main</a>
+        <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce MBD-LMs</a>
+      </div>
     </section>
 
     <section id="results">
