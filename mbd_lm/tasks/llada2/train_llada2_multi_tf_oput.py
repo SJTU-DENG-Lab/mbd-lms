@@ -46,7 +46,7 @@ from mbd_lm.tasks.utils.multi_bd_mask import (
 from mbd_lm.tasks.utils.llada2_args import Arguments
 from mbd_lm.tasks.utils.loss_weight_scheduler import LossWeightScheduler
 from mbd_lm.tasks.utils.early_stopping import EarlyStoppingMonitor
-from mbd_lm.tasks.llada2.train_llada2_bd_oput import (
+from mbd_lm.tasks.llada2.train_llada2_multi_tf import (
     apply_dmax_on_policy_rollout,
     compute_global_ce_loss,
 )
