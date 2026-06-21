@@ -45,7 +45,7 @@
       <a href="#multitf">MultiTF</a>
       <a href="#block-buffer">Block Buffer</a>
       <a href="#training-code">Training Code</a>
-      <a class="nav-engine" href="#engine">Engine</a>
+      <a href="#engine">Engine</a>
       <a href="#results">Results</a>
       <a href="#throughput">Throughput</a>
       <a href="#citation">Citation</a>
@@ -166,20 +166,20 @@
 
     <section id="engine" class="engine-section">
       <div class="engine-kicker">Runtime Engine</div>
-      <h2>Diffulex Turns MultiBD into a Runnable System</h2>
-      <p class="engine-lede">MultiBD is not only a training or decoding idea. To make it useful, the inference engine must maintain a moving block buffer, reuse prefix KV cache, schedule active blocks, commit completed blocks, and keep execution shapes friendly to optimized kernels. Diffulex is the engine stack built for that job.</p>
+      <h2>Diffulex Is Built for Research-Grade dLLM Inference</h2>
+      <p class="engine-lede">Diffulex is a flexible and extensible inference engine for block-style diffusion language models. The MBD-LMs paradigm provides a broad reference frame for implementing and comparing dLLM inference mechanisms, from SingleBD and MultiBD to future DualCache-style cache designs, TokenMerge decoding, Edit refinement, and Uniform DLM paths such as DiffusionGemma.</p>
       <div class="grid engine-grid">
         <div class="card engine-card">
-          <h3>Block-aware runtime</h3>
-          <p>Diffulex maps <code>decoding_strategy=multi_bd</code> to strategy-specific request state, scheduler, KV cache manager, model runner, and attention metadata.</p>
+          <h3>Paradigm coverage</h3>
+          <p>SingleBD, MultiBD, DualCache-style cache behavior, TokenMerge, Edit decoding, and Uniform DLM runtimes can be expressed through strategy-specific request state, schedulers, KV cache managers, model runners, and samplers.</p>
         </div>
         <div class="card engine-card">
-          <h3>Serving-oriented cache design</h3>
-          <p>The engine preserves a clean cached prefix, supports prefix reuse, and commits completed blocks while later blocks are already being refined.</p>
+          <h3>Extension-friendly engine</h3>
+          <p>The engine separates algorithm semantics from systems concerns such as prefix caching, paged attention, CUDA Graph-friendly execution, batching, benchmarking, and HTTP serving.</p>
         </div>
         <div class="card engine-card">
-          <h3>Practical optimization path</h3>
-          <p>Diffulex integrates paged attention, CUDA Graph-friendly static execution, vLLM-backed layers, MoE paths, benchmark tooling, and HTTP serving.</p>
+          <h3>Agent-assisted research</h3>
+          <p>With the existing strategy implementations as references, researchers can efficiently use coding agents such as Claude Code or Codex to add new algorithms and quickly turn them into runnable, measurable systems.</p>
         </div>
       </div>
       <div class="engine-split">

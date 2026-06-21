@@ -214,14 +214,6 @@ h1 {
   color: var(--accent-dark);
 }
 
-.nav a.nav-engine {
-  padding: 2px 10px;
-  border: 1px solid rgba(37, 99, 235, 0.22);
-  border-radius: 999px;
-  background: var(--engine-soft);
-  color: var(--engine-dark);
-}
-
 .definition-summary {
   margin: 24px 0;
   padding: 0;
