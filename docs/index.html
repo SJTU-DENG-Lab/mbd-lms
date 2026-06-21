@@ -53,30 +53,27 @@
     </div>
   </nav>
 
-  <div class="definition-band" aria-label="MBD-LMs definition">
-    <div class="container">
-      <div class="definition-head">
-        <span>MBD-LMs Definition</span>
-        <strong>Multi-Block Diffusion Language Models are BD-LMs trained for MultiBD states and executed by a MultiBD runtime.</strong>
-      </div>
-      <div class="definition-grid">
-        <div class="definition-card model-definition">
-          <div class="definition-card-label">Model-side focus</div>
-          <p>MBD-LMs are post-trained BD-LMs. MultiTF teaches the model to handle bounded noisy block groups, heterogeneous slot-wise mask ratios, and block-causal visibility patterns that match practical MultiBD inference.</p>
-        </div>
-        <div class="definition-card inference-definition">
-          <div class="definition-card-label">Inference-side focus</div>
-          <p>MBD-LMs are served with MultiBD. The runtime keeps a bounded running-set of blocks, uses Block Buffer execution, preserves prefix KV caching, commits completed blocks, and runs through Diffulex.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <main class="container">
     <section id="tldr">
       <h2>TL;DR</h2>
       <p>Block Diffusion Language Models (BD-LMs) make diffusion-based text generation more practical by supporting KV caching and flexible-length generation. However, native BD-LMs usually perform <strong>Single-Block Diffusion (SingleBD)</strong>: each forward pass refines one noisy block conditioned on a clean cached prefix. This preserves the serving benefits of BD-LMs, but blocks are still processed sequentially.</p>
       <p>We propose <strong>Multi-Block Diffusion Language Models (MBD-LMs)</strong>, a formulation and post-training recipe for reliable <strong>Multi-Block Diffusion (MultiBD)</strong>. On the model side, MBD-LMs are BD-LMs post-trained with <strong>Multi-block Teacher Forcing (MultiTF)</strong> so they can handle practical MultiBD running-set states. On the inference side, MBD-LMs decode a bounded running-set of consecutive blocks through an optimized <strong>Block Buffer</strong> runtime.</p>
+      <div class="definition-summary" aria-label="MBD-LMs definition">
+        <div class="definition-summary-head">
+          <span>MBD-LMs Definition</span>
+          <strong>BD-LMs trained for MultiBD states, then executed by a MultiBD runtime.</strong>
+        </div>
+        <div class="definition-grid">
+          <div class="definition-card model-definition">
+            <div class="definition-card-label">Model focus</div>
+            <p>MultiTF post-training teaches the model bounded noisy block groups, heterogeneous slot-wise mask ratios, and block-causal visibility patterns.</p>
+          </div>
+          <div class="definition-card inference-definition">
+            <div class="definition-card-label">Inference focus</div>
+            <p>MultiBD keeps a bounded running-set, uses Block Buffer execution, preserves prefix KV caching, commits completed blocks, and runs through Diffulex.</p>
+          </div>
+        </div>
+      </div>
       <p>The training and method code lives in <strong>SJTU-DENG-Lab/mbd-lms</strong>. The executable inference runtime is <strong>Diffulex</strong>: use the Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms"><code>mbd-lms</code></a> branch for experiment reproduction, and Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main"><code>main</code></a> for engine development and new decoding algorithms.</p>
       <p>Empirically, <strong>MBD-LLaDA2-Mini</strong> increases average Tokens Per Forward pass (TPF) from <strong>3.47 to 6.19</strong> and improves average accuracy from <strong>79.95% to 81.03%</strong>. When combined with DMax, <strong>MBD-LLaDA2-Mini-DMax</strong> reaches an average TPF of <strong>9.34</strong> with only a <strong>1.02 percentage-point</strong> average accuracy drop on math and code benchmarks.</p>
       <figure class="figure noborder">

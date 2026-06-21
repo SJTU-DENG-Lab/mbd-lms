@@ -222,34 +222,33 @@ h1 {
   color: var(--engine-dark);
 }
 
-.definition-band {
-  border-bottom: 1px solid var(--line);
-  background: #ffffff;
+.definition-summary {
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fbfcfe;
 }
 
-.definition-band .container {
-  padding: 18px 0;
-}
-
-.definition-head {
-  display: grid;
-  grid-template-columns: 190px minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
+.definition-summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: baseline;
   margin-bottom: 14px;
 }
 
-.definition-head span {
+.definition-summary-head span {
   color: var(--accent-dark);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.definition-head strong {
+.definition-summary-head strong {
   color: #111827;
-  font-size: 1.02rem;
+  font-size: 1rem;
   line-height: 1.45;
 }
 
@@ -542,7 +541,6 @@ footer {
   .engine-banner-actions .button {
     width: 100%;
   }
-  .definition-head,
   .definition-grid {
     grid-template-columns: 1fr;
   }
