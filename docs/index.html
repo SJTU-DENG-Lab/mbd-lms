@@ -22,6 +22,14 @@
         <a class="button secondary" href="https://sjtu-deng-lab.github.io/blogs/mbd/">Lab Blog</a>
         <span class="button disabled" aria-disabled="true">Paper Coming Soon</span>
       </div>
+      <div class="engine-banner">
+        <div>
+          <div class="engine-banner-label">Inference Engine</div>
+          <strong>Diffulex is where MBD-LMs become runnable.</strong>
+          <p>Train and define the method in <code>mbd-lms</code>; reproduce, serve, profile, and extend MultiBD systems through Diffulex.</p>
+        </div>
+        <a class="button engine" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Open Diffulex Engine</a>
+      </div>
     </div>
   </header>
 
@@ -33,7 +41,7 @@
       <a href="#multitf">MultiTF</a>
       <a href="#block-buffer">Block Buffer</a>
       <a href="#training-code">Training Code</a>
-      <a href="#engine">Engine</a>
+      <a class="nav-engine" href="#engine">Engine</a>
       <a href="#results">Results</a>
       <a href="#throughput">Throughput</a>
       <a href="#code">Code</a>
@@ -129,10 +137,10 @@
           <p>Start here when working on MBD-LM training, reproducing MultiTF data construction, or converting trained checkpoints into usable model artifacts.</p>
           <a class="button" href="https://github.com/SJTU-DENG-Lab/mbd-lms">Open mbd-lms Training Repo</a>
         </div>
-        <div>
+        <div class="engine-target">
           <h3>Run and Serve</h3>
           <p>Move to Diffulex when you need benchmark execution, HTTP serving, optimized kernels, prefix caching, and system-level MultiBD runtime behavior.</p>
-          <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Open Diffulex Reproduction Branch</a>
+          <a class="button engine secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Open Diffulex Reproduction Branch</a>
         </div>
       </div>
     </section>
@@ -167,7 +175,7 @@
       </div>
       <div class="engine-actions">
         <a class="button engine" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Explore Diffulex Main</a>
-        <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce MBD-LMs</a>
+        <a class="button engine secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce MBD-LMs</a>
       </div>
     </section>
 
