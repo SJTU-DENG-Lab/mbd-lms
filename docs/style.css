@@ -223,22 +223,29 @@ h1 {
 }
 
 .definition-summary {
-  margin: 20px 0;
-  padding: 18px;
-  border: 1px solid var(--line);
+  margin: 24px 0;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #d7dee9;
   border-radius: 18px;
-  background: #fbfcfe;
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
 }
 
 .definition-summary-head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  align-items: baseline;
-  margin-bottom: 14px;
+  display: block;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, #f8fffd 0%, #f8fbff 100%);
 }
 
 .definition-summary-head span {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 118, 110, 0.22);
   color: var(--accent-dark);
   font-size: 0.78rem;
   font-weight: 800;
@@ -247,32 +254,36 @@ h1 {
 }
 
 .definition-summary-head strong {
+  display: block;
   color: #111827;
-  font-size: 1rem;
-  line-height: 1.45;
+  font-size: 1.08rem;
+  line-height: 1.42;
 }
 
 .definition-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 0;
 }
 
 .definition-card {
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #fbfcfe;
+  padding: 18px 20px;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
 }
 
 .definition-card p {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   color: #334155;
   font-size: 0.95rem;
   line-height: 1.58;
 }
 
 .definition-card-label {
+  display: inline-flex;
+  padding: 3px 9px;
+  border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.07em;
@@ -280,20 +291,23 @@ h1 {
 }
 
 .model-definition {
-  border-color: rgba(15, 118, 110, 0.24);
+  border-left: 5px solid var(--accent);
+  border-right: 1px solid var(--line);
   background: #f8fffd;
 }
 
 .model-definition .definition-card-label {
+  background: var(--soft);
   color: var(--accent-dark);
 }
 
 .inference-definition {
-  border-color: rgba(37, 99, 235, 0.28);
+  border-left: 5px solid var(--engine);
   background: #f8fbff;
 }
 
 .inference-definition .definition-card-label {
+  background: var(--engine-soft);
   color: var(--engine-dark);
 }
 
@@ -543,6 +557,10 @@ footer {
   }
   .definition-grid {
     grid-template-columns: 1fr;
+  }
+  .model-definition {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
   .grid {
     grid-template-columns: 1fr;
