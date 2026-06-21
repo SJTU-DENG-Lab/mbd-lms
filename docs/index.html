@@ -48,7 +48,6 @@
       <a class="nav-engine" href="#engine">Engine</a>
       <a href="#results">Results</a>
       <a href="#throughput">Throughput</a>
-      <a href="#code">Code</a>
       <a href="#citation">Citation</a>
     </div>
   </nav>
@@ -222,22 +221,6 @@
         <img src="assets/table3_throughput.png" alt="Throughput and latency results">
         <figcaption><strong>Table 3.</strong> Throughput and single-step latency comparison on two H100 GPUs with TP=2. MultiBD improves realized TPS despite increasing per-step latency.</figcaption>
       </figure>
-    </section>
-
-    <section id="code" class="compact">
-      <h2>Code Paths</h2>
-      <p class="note">Use <code>mbd-lms</code> for training and method work; use Diffulex for inference, serving, and systems development.</p>
-      <pre><code># Training, MultiTF, datasets, configs, and checkpoint conversion
-git clone https://github.com/SJTU-DENG-Lab/mbd-lms.git
-cd mbd-lms
-
-# Reproduce reported MBD-LMs inference/evaluation
-git clone https://github.com/SJTU-DENG-Lab/Diffulex.git
-cd Diffulex
-git checkout mbd-lms
-
-# Active engine development and new algorithms
-git checkout main</code></pre>
     </section>
 
     <section id="citation" class="compact">
