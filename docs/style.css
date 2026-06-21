@@ -136,10 +136,6 @@ h1 {
 }
 
 .engine-banner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: center;
   max-width: 920px;
   margin-top: 28px;
   padding: 20px;
@@ -148,6 +144,17 @@ h1 {
   border-radius: 18px;
   background: var(--engine-soft);
   box-shadow: 0 16px 34px rgba(37, 99, 235, 0.12);
+}
+
+.engine-banner-main {
+  display: flex;
+  gap: 18px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.engine-banner-copy {
+  min-width: 0;
 }
 
 .engine-banner strong {
@@ -168,6 +175,16 @@ h1 {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.engine-banner-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.engine-banner-actions .button {
+  white-space: nowrap;
 }
 
 .nav {
@@ -441,8 +458,13 @@ footer {
   section {
     padding: 24px;
   }
-  .engine-banner {
-    grid-template-columns: 1fr;
+  .engine-banner-main {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .engine-banner-actions,
+  .engine-banner-actions .button {
+    width: 100%;
   }
   .grid {
     grid-template-columns: 1fr;
