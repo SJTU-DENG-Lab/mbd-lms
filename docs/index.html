@@ -132,14 +132,23 @@
                 <span class="block-status"></span>
                 <span class="block-fill"></span>
               </div>
+              <div class="decode-block" id="single-b4">
+                <span class="block-name">Block 4</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
             </div>
             <div class="timeline" data-timeline="single" aria-label="SingleBD timeline">
               <span class="timeline-step">Decode B1</span>
               <span class="timeline-step">Decode B1</span>
               <span class="timeline-step">Finalize B1</span>
               <span class="timeline-step bubble-step">Store B1 only</span>
+              <span class="timeline-step">Start B2</span>
               <span class="timeline-step">Decode B2</span>
+              <span class="timeline-step">Finalize B2</span>
               <span class="timeline-step bubble-step">Store B2 only</span>
+              <span class="timeline-step">Start B3</span>
+              <span class="timeline-step">Decode B3</span>
             </div>
             <p class="panel-note" id="single-note">Later blocks wait until block 1 is stored into KV.</p>
           </article>
@@ -174,14 +183,23 @@
                 <span class="block-status"></span>
                 <span class="block-fill"></span>
               </div>
+              <div class="decode-block" id="multi-b4">
+                <span class="block-name">Block 4</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
             </div>
             <div class="timeline" data-timeline="multi" aria-label="MultiBD timeline">
               <span class="timeline-step">Decode B1</span>
-              <span class="timeline-step">Decode B1</span>
+              <span class="timeline-step">Stabilize B1</span>
+              <span class="timeline-step overlap-step">Admit B2</span>
               <span class="timeline-step overlap-step">Decode B1+B2</span>
               <span class="timeline-step overlap-step">Store B1 + Decode B2</span>
+              <span class="timeline-step overlap-step">Slide buffer</span>
               <span class="timeline-step overlap-step">Decode B2+B3</span>
-              <span class="timeline-step overlap-step">Store B2 + Decode B3</span>
+              <span class="timeline-step overlap-step">Admit B4</span>
+              <span class="timeline-step overlap-step">Store B2 + Decode tail</span>
+              <span class="timeline-step overlap-step">Steady pipeline</span>
             </div>
             <p class="panel-note" id="multi-note">The next block is already inside the running-set before block 1 leaves the buffer.</p>
           </article>
@@ -370,9 +388,10 @@
             note: "Later blocks wait until block 1 is stored into KV.",
             timeline: 0,
             blocks: {
-              b1: ["active", "Denoising", 32],
+              b1: ["active", "Denoising", 24],
               b2: ["waiting", "Not admitted", 0],
-              b3: ["future", "Future", 0]
+              b3: ["future", "Future", 0],
+              b4: ["future", "Future", 0]
             }
           },
           multi: {
@@ -383,58 +402,95 @@
             note: "The buffer already reserves physical slots for later blocks.",
             timeline: 0,
             blocks: {
-              b1: ["active", "Denoising", 32],
+              b1: ["active", "Denoising", 24],
               b2: ["dummy", "Dummy slot", 0],
-              b3: ["future", "Future", 0]
+              b3: ["dummy", "Dummy slot", 0],
+              b4: ["future", "Future", 0]
             }
           }
         },
         {
-          title: "Iterate inside block 1",
-          detail: "SingleBD still owns only one active block. MultiBD keeps static buffer capacity ready for expansion.",
-          takeaway: "SingleBD has intra-block parallelism only; MultiBD prepares a running-set.",
+          title: "Refine block 1 inside the current window",
+          detail: "SingleBD spends another forward on the same block. MultiBD does the same useful work, but its fixed buffer already has room for the next active block.",
+          takeaway: "At this point, the speed difference is not visible yet; MultiBD is preparing the overlap.",
           single: {
             phase: "Continue B1",
             forward: "B1 denoising",
             output: "B1 token updates",
             kv: "Read prefix KV",
-            note: "Block 2 cannot start while block 1 is still the active block.",
+            note: "The decode window still contains only block 1.",
             timeline: 1,
             blocks: {
-              b1: ["active", "More stable", 58],
+              b1: ["active", "More stable", 48],
               b2: ["waiting", "Not admitted", 0],
-              b3: ["future", "Future", 0]
+              b3: ["future", "Future", 0],
+              b4: ["future", "Future", 0]
             }
           },
           multi: {
-            phase: "Continue B1",
+            phase: "Stabilize B1",
             forward: "B1 denoising",
             output: "B1 token updates",
             kv: "Read prefix KV",
-            note: "The next slot remains a cheap placeholder until it is activated.",
+            note: "Trailing buffer slots stay dummy, so the physical shape can remain stable.",
             timeline: 1,
             blocks: {
-              b1: ["active", "More stable", 58],
+              b1: ["active", "More stable", 48],
               b2: ["dummy", "Ready slot", 0],
-              b3: ["future", "Future", 0]
+              b3: ["dummy", "Dummy slot", 0],
+              b4: ["future", "Future", 0]
             }
           }
         },
         {
-          title: "Admit the next block before the front block leaves",
-          detail: "When block 1 becomes sufficiently stable, MultiBD activates block 2 in the running-set. SingleBD still cannot touch block 2.",
-          takeaway: "This is where inter-block parallelism appears: B1 and B2 are refined together.",
+          title: "Block 1 becomes near-committable",
+          detail: "The front block is mostly solved. SingleBD still cannot start block 2; MultiBD can activate the next slot before block 1 leaves the buffer.",
+          takeaway: "MultiBD starts exposing inter-block parallelism before the KV store happens.",
           single: {
             phase: "Finalize B1",
             forward: "B1 final denoising",
             output: "B1 final tokens",
             kv: "Read prefix KV",
-            note: "The next forward is still required only to store block 1 KV.",
+            note: "Block 2 remains untouched until block 1 is completely committed.",
+            timeline: 2,
+            blocks: {
+              b1: ["ready", "Near complete", 88],
+              b2: ["waiting", "Not admitted", 0],
+              b3: ["future", "Future", 0],
+              b4: ["future", "Future", 0]
+            }
+          },
+          multi: {
+            phase: "Admit B2",
+            forward: "B1 + B2 denoising",
+            output: "B1 final tokens + B2 updates",
+            kv: "Read prefix KV",
+            note: "Block 2 enters the running-set while block 1 is still physically present.",
+            timeline: 2,
+            blocks: {
+              b1: ["ready", "Near complete", 88],
+              b2: ["active", "Denoising", 18],
+              b3: ["dummy", "Ready slot", 0],
+              b4: ["future", "Future", 0]
+            }
+          }
+        },
+        {
+          title: "Joint decode happens before the store-only point",
+          detail: "SingleBD finishes block 1 alone. MultiBD uses the same step budget to continue block 2 as well.",
+          takeaway: "The later block has already accumulated progress before the front block enters KV.",
+          single: {
+            phase: "Finish B1",
+            forward: "B1 final denoising",
+            output: "B1 final tokens",
+            kv: "Read prefix KV",
+            note: "The next forward will be a pure KV-store forward.",
             timeline: 2,
             blocks: {
               b1: ["ready", "Complete", 100],
               b2: ["waiting", "Not admitted", 0],
-              b3: ["future", "Future", 0]
+              b3: ["future", "Future", 0],
+              b4: ["future", "Future", 0]
             }
           },
           multi: {
@@ -442,30 +498,32 @@
             forward: "Joint denoising",
             output: "B1 + B2 updates",
             kv: "Read prefix KV",
-            note: "Block 2 starts receiving useful decode work before block 1 is committed.",
-            timeline: 2,
+            note: "The front block is complete, and the tail block keeps improving.",
+            timeline: 3,
             blocks: {
               b1: ["ready", "Complete", 100],
-              b2: ["active", "Denoising", 30],
-              b3: ["dummy", "Dummy slot", 0]
+              b2: ["active", "Denoising", 42],
+              b3: ["dummy", "Ready slot", 0],
+              b4: ["future", "Future", 0]
             }
           }
         },
         {
           title: "SingleBD hits a KV-store-only forward",
-          detail: "Native BD-LM serving must run an extra forward to materialize block 1 into KV. That forward produces no new output. MultiBD overlaps the same KV-store work with block 2 decoding.",
+          detail: "Native BD-LM serving still needs a forward to materialize block 1 into KV. That forward produces no new output. MultiBD overlaps the same KV-store work with block 2 decoding.",
           takeaway: "The store bubble becomes useful work: store B1 KV while decoding B2.",
           single: {
             phase: "Store B1 only",
             forward: "KV-store forward",
             output: "No output",
             kv: "Store B1 KV",
-            note: "This is the store bubble: the GPU runs a forward, but the request does not advance visible generation.",
+            note: "This is the store bubble: the GPU runs a forward, but visible generation does not advance.",
             timeline: 3,
             blocks: {
               b1: ["bubble", "Store KV", 100],
               b2: ["waiting", "Still waiting", 0],
-              b3: ["future", "Future", 0]
+              b3: ["future", "Future", 0],
+              b4: ["future", "Future", 0]
             }
           },
           multi: {
@@ -474,18 +532,19 @@
             output: "B2 token updates",
             kv: "Store B1 KV",
             note: "Block 1 is a pure KV lane, while block 2 keeps decoding in the same step.",
-            timeline: 3,
+            timeline: 4,
             blocks: {
               b1: ["store", "Store KV", 100],
               b2: ["active", "Denoising", 62],
-              b3: ["dummy", "Ready slot", 0]
+              b3: ["dummy", "Ready slot", 0],
+              b4: ["future", "Future", 0]
             }
           }
         },
         {
-          title: "The next block is already ahead",
-          detail: "After block 1 enters KV, SingleBD only begins block 2. MultiBD has already spent useful forwards on block 2 and can activate block 3.",
-          takeaway: "MultiBD shortens the idle gap between consecutive blocks.",
+          title: "The buffer slides after block 1 commits",
+          detail: "SingleBD only now starts block 2. MultiBD has already spent useful forwards on block 2 and can slide the buffer without changing the physical execution pattern.",
+          takeaway: "After one block, MultiBD is already ahead on the next block.",
           single: {
             phase: "Start B2",
             forward: "B2 denoising",
@@ -495,8 +554,42 @@
             timeline: 4,
             blocks: {
               b1: ["prefix", "In KV", 100],
-              b2: ["active", "Denoising", 30],
-              b3: ["waiting", "Not admitted", 0]
+              b2: ["active", "Denoising", 18],
+              b3: ["waiting", "Not admitted", 0],
+              b4: ["future", "Future", 0]
+            }
+          },
+          multi: {
+            phase: "Slide buffer",
+            forward: "B2 denoising",
+            output: "B2 token updates",
+            kv: "Read prefix+B1 KV",
+            note: "B1 becomes prefix KV, B2 moves to the front, and a later dummy slot stays available.",
+            timeline: 5,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["active", "Mostly stable", 72],
+              b3: ["dummy", "Ready slot", 0],
+              b4: ["future", "Future", 0]
+            }
+          }
+        },
+        {
+          title: "MultiBD admits block 3 while SingleBD is still on block 2",
+          detail: "SingleBD continues B2 alone. MultiBD uses the bounded running-set to decode B2 and B3 together.",
+          takeaway: "The pipeline effect repeats across blocks, not just once.",
+          single: {
+            phase: "Decode B2",
+            forward: "B2 denoising",
+            output: "B2 token updates",
+            kv: "Read prefix+B1 KV",
+            note: "Block 3 cannot start yet.",
+            timeline: 5,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["active", "More stable", 46],
+              b3: ["waiting", "Not admitted", 0],
+              b4: ["future", "Future", 0]
             }
           },
           multi: {
@@ -504,43 +597,112 @@
             forward: "Joint denoising",
             output: "B2 + B3 updates",
             kv: "Read prefix+B1 KV",
-            note: "The buffer slides forward and activates the next dummy slot.",
-            timeline: 4,
+            note: "B3 starts before B2 is committed, preserving a bounded active tail.",
+            timeline: 6,
             blocks: {
               b1: ["prefix", "In KV", 100],
-              b2: ["active", "Mostly stable", 82],
-              b3: ["active", "Denoising", 26]
+              b2: ["active", "Near complete", 88],
+              b3: ["active", "Denoising", 26],
+              b4: ["dummy", "Ready slot", 0]
             }
           }
         },
         {
-          title: "The pattern repeats",
-          detail: "SingleBD repeatedly alternates decode and store-only forwards. MultiBD keeps a small running-set so later blocks can decode while earlier blocks are committed.",
-          takeaway: "MBD-LMs convert sequential block processing into bounded inter-block parallelism.",
+          title: "The running-set expands at the tail",
+          detail: "SingleBD is still finalizing B2. MultiBD can keep B2 near the front, continue B3, and prepare B4 as the next tail slot.",
+          takeaway: "The bounded buffer gives MultiBD parallelism without decoding an unbounded suffix.",
+          single: {
+            phase: "Finalize B2",
+            forward: "B2 final denoising",
+            output: "B2 final tokens",
+            kv: "Read prefix+B1 KV",
+            note: "The same store-only bubble is about to appear again.",
+            timeline: 6,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["ready", "Complete", 100],
+              b3: ["waiting", "Not admitted", 0],
+              b4: ["future", "Future", 0]
+            }
+          },
+          multi: {
+            phase: "Admit B4",
+            forward: "B2 + B3 + B4 denoising",
+            output: "Tail-block updates",
+            kv: "Read prefix+B1 KV",
+            note: "B4 enters as the new tail while earlier active blocks remain bounded.",
+            timeline: 7,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["ready", "Complete", 100],
+              b3: ["active", "Denoising", 48],
+              b4: ["active", "Denoising", 16]
+            }
+          }
+        },
+        {
+          title: "The second store bubble is also overlapped",
+          detail: "SingleBD must store block 2 with no output. MultiBD stores block 2 while block 3 and block 4 continue making progress.",
+          takeaway: "Store-only forwards become decode-store overlap in the steady state.",
           single: {
             phase: "Store B2 only",
             forward: "KV-store forward",
             output: "No output",
             kv: "Store B2 KV",
-            note: "Each completed block creates another store-only bubble.",
-            timeline: 5,
+            note: "Each completed block creates another no-output forward.",
+            timeline: 7,
             blocks: {
               b1: ["prefix", "In KV", 100],
               b2: ["bubble", "Store KV", 100],
-              b3: ["waiting", "Still waiting", 0]
+              b3: ["waiting", "Still waiting", 0],
+              b4: ["future", "Future", 0]
             }
           },
           multi: {
-            phase: "Store B2 + Decode B3",
+            phase: "Store B2 + Decode tail",
             forward: "Overlap forward",
-            output: "B3 token updates",
+            output: "B3 + B4 updates",
             kv: "Store B2 KV",
-            note: "The front block commits to KV while the tail block keeps making progress.",
-            timeline: 5,
+            note: "The front completed block commits while the tail remains productive.",
+            timeline: 8,
             blocks: {
               b1: ["prefix", "In KV", 100],
               b2: ["store", "Store KV", 100],
-              b3: ["active", "Denoising", 58]
+              b3: ["active", "Mostly stable", 68],
+              b4: ["active", "Denoising", 34]
+            }
+          }
+        },
+        {
+          title: "Steady-state block pipeline",
+          detail: "SingleBD starts block 3 only after storing block 2. MultiBD already has later blocks in flight, so the request keeps producing useful decode work across store events.",
+          takeaway: "MBD-LMs convert sequential block processing into bounded inter-block parallelism.",
+          single: {
+            phase: "Start B3",
+            forward: "B3 denoising",
+            output: "B3 token updates",
+            kv: "Read prefix+B1+B2 KV",
+            note: "The decode-store alternation repeats block by block.",
+            timeline: 8,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["prefix", "In KV", 100],
+              b3: ["active", "Denoising", 18],
+              b4: ["waiting", "Not admitted", 0]
+            }
+          },
+          multi: {
+            phase: "Steady pipeline",
+            forward: "Tail denoising",
+            output: "B3 + B4 updates",
+            kv: "Read committed prefix",
+            note: "The running-set keeps decode work available while completed blocks enter KV.",
+            timeline: 9,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["prefix", "In KV", 100],
+              b3: ["active", "Near complete", 86],
+              b4: ["active", "Denoising", 58]
             }
           }
         }
