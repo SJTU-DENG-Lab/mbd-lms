@@ -8,19 +8,57 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <nav class="nav" aria-label="Page navigation">
+    <div class="container">
+      <a class="nav-logo" href="https://sjtu-deng-lab.github.io/" aria-label="DENG Lab website">
+        <img src="assets/sjtu-deng-lab-logo.png" alt="DENG Lab">
+      </a>
+      <a href="#videos">Videos</a>
+      <a href="#tldr">TL;DR</a>
+      <a href="#contributions">Contributions</a>
+      <a href="#decode-demo">Decode Demo</a>
+      <a href="#motivation">Motivation</a>
+      <a href="#formulation">MBD-LMs</a>
+      <a href="#multitf">MultiTF</a>
+      <a href="#block-buffer">Block Buffer</a>
+      <a href="#training-code">Training Code</a>
+      <a href="#engine">Engine</a>
+      <a href="#results">Results</a>
+      <a href="#throughput">Throughput</a>
+      <a href="#citation">Citation</a>
+    </div>
+  </nav>
+
   <header class="hero">
     <div class="container">
-      <div class="labline"><span class="labmark">DL</span> DENG Lab</div>
       <h1>Multi-Block Diffusion Language Models</h1>
       <p class="subtitle">A training recipe, paradigm definition, and runnable inference path for practical Multi-Block Diffusion Language Models.</p>
       <p class="authors">Yijie Jin, Jiajun Xu, Yuxuan Liu, Chenkai Xu, Yi Tu, Jiajun Li, Dandan Tu, Xiaohui Ye, Kai Yu, Pengfei Liu, Zhijie Deng</p>
       <p class="affiliations">Shanghai Jiao Tong University &nbsp; | &nbsp; Xi'an Jiao Tong University &nbsp; | &nbsp; Huawei</p>
+      <div class="hero-metrics" role="group" aria-label="Headline metrics">
+        <div>
+          <span>Avg. TPF</span>
+          <strong>3.47 -> 6.19</strong>
+          <p>MBD-LLaDA2-Mini</p>
+        </div>
+        <div>
+          <span>Avg. Accuracy</span>
+          <strong>79.95% -> 81.03%</strong>
+          <p>MBD-LLaDA2-Mini</p>
+        </div>
+        <div>
+          <span>DMax Avg. TPF</span>
+          <strong>6.35 -> 9.34</strong>
+          <p>MBD-LLaDA2-Mini-DMax</p>
+        </div>
+      </div>
       <div class="actions">
+        <a class="button video-action" href="#videos">Watch Demos</a>
         <a class="button" href="https://github.com/SJTU-DENG-Lab/mbd-lms">Training Code</a>
+        <a class="button engine-engraved" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex Engine</a>
         <a class="button secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce</a>
-        <a class="button engine secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex Engine</a>
         <a class="button secondary" href="https://sjtu-deng-lab.github.io/blogs/mbd/">Lab Blog</a>
-        <span class="button disabled" aria-disabled="true">Paper Coming Soon</span>
+        <a class="button paper" href="assets/MBD-LMs.pdf">Paper</a>
       </div>
       <div class="engine-banner">
         <div class="engine-banner-label">Inference Engine</div>
@@ -37,28 +75,123 @@
     </div>
   </header>
 
-  <nav class="nav" aria-label="Page navigation">
-    <div class="container">
-      <a href="#tldr">TL;DR</a>
-      <a href="#decode-demo">Decode Demo</a>
-      <a href="#motivation">Motivation</a>
-      <a href="#formulation">MBD-LMs</a>
-      <a href="#multitf">MultiTF</a>
-      <a href="#block-buffer">Block Buffer</a>
-      <a href="#training-code">Training Code</a>
-      <a href="#engine">Engine</a>
-      <a href="#results">Results</a>
-      <a href="#throughput">Throughput</a>
-      <a href="#citation">Citation</a>
-    </div>
-  </nav>
-
   <main class="container">
+    <section id="videos" class="video-section">
+      <div class="section-kicker video-kicker">Diffulex Demo Videos</div>
+      <div class="video-section-head">
+        <div>
+          <h2>Watch Diffulex Decode in Motion</h2>
+          <p class="section-lede">These demos were generated with <strong>Diffulex</strong>, our inference engine for block-style diffusion language models. Start with the featured LLaDA2-Mini trace, then compare the remaining LLaDA2-Mini and DiffusionGemma runs.</p>
+        </div>
+        <div class="video-head-actions">
+          <button class="button video-action video-open" type="button" data-video="assets/videos/llada2_mini_1.mp4" data-title="LLaDA2-Mini MultiBD Demo">Watch Featured Demo</button>
+          <a class="button engine secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Follow Diffulex</a>
+        </div>
+      </div>
+
+      <div class="video-feature">
+        <div class="video-player">
+          <video class="video-preview" muted loop controls preload="metadata" playsinline>
+            <source src="assets/videos/llada2_mini_1.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="video-feature-copy">
+          <span>Featured Diffulex trace</span>
+          <h3>LLaDA2-Mini MultiBD Demo</h3>
+          <p>Use this as the first visual entry point before reading the detailed interactive explanation.</p>
+          <p class="video-note"><strong>Playback note.</strong> The demo videos pass through a Streamlit frontend, which can consume much of the engine-side throughput advantage. Use the aggregate TPS numbers in the Runtime Engine section to judge the actual engine path.</p>
+          <button class="button secondary video-open" type="button" data-video="assets/videos/llada2_mini_1.mp4" data-title="LLaDA2-Mini MultiBD Demo">Watch Full Size</button>
+        </div>
+      </div>
+
+      <div class="video-group">
+        <div class="video-group-head">
+          <h3>LLaDA2-Mini demos</h3>
+          <p>Four short traces for the main MBD-LLaDA2-Mini setup.</p>
+        </div>
+        <div class="video-grid">
+          <button class="video-card video-open" type="button" data-video="assets/videos/llada2_mini_1.mp4" data-title="LLaDA2-Mini 1">
+            <video class="video-preview" muted loop preload="metadata" playsinline>
+              <source src="assets/videos/llada2_mini_1.mp4" type="video/mp4">
+            </video>
+            <span class="video-card-copy">
+              <span class="video-card-title">LLaDA2-Mini 1</span>
+              <span>Click to watch</span>
+            </span>
+          </button>
+          <button class="video-card video-open" type="button" data-video="assets/videos/llada2_mini_2.mp4" data-title="LLaDA2-Mini 2">
+            <video class="video-preview" muted loop preload="metadata" playsinline>
+              <source src="assets/videos/llada2_mini_2.mp4" type="video/mp4">
+            </video>
+            <span class="video-card-copy">
+              <span class="video-card-title">LLaDA2-Mini 2</span>
+              <span>Click to watch</span>
+            </span>
+          </button>
+          <button class="video-card video-open" type="button" data-video="assets/videos/llada2_mini_3.mp4" data-title="LLaDA2-Mini 3">
+            <video class="video-preview" muted loop preload="metadata" playsinline>
+              <source src="assets/videos/llada2_mini_3.mp4" type="video/mp4">
+            </video>
+            <span class="video-card-copy">
+              <span class="video-card-title">LLaDA2-Mini 3</span>
+              <span>Click to watch</span>
+            </span>
+          </button>
+          <button class="video-card video-open" type="button" data-video="assets/videos/llada2_mini_4.mp4" data-title="LLaDA2-Mini 4">
+            <video class="video-preview" muted loop preload="metadata" playsinline>
+              <source src="assets/videos/llada2_mini_4.mp4" type="video/mp4">
+            </video>
+            <span class="video-card-copy">
+              <span class="video-card-title">LLaDA2-Mini 4</span>
+              <span>Click to watch</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="video-group">
+        <div class="video-group-head">
+          <h3>DiffusionGemma demos</h3>
+          <p>Additional traces for comparing behavior across a second diffusion model family.</p>
+        </div>
+        <div class="video-grid three-up">
+          <button class="video-card video-open" type="button" data-video="assets/videos/dgemma_1.mp4" data-title="DiffusionGemma 1">
+            <video class="video-preview" muted loop preload="metadata" playsinline>
+              <source src="assets/videos/dgemma_1.mp4" type="video/mp4">
+            </video>
+            <span class="video-card-copy">
+              <span class="video-card-title">DiffusionGemma 1</span>
+              <span>Click to watch</span>
+            </span>
+          </button>
+          <button class="video-card video-open" type="button" data-video="assets/videos/dgemma_2.mp4" data-title="DiffusionGemma 2">
+            <video class="video-preview" muted loop preload="metadata" playsinline>
+              <source src="assets/videos/dgemma_2.mp4" type="video/mp4">
+            </video>
+            <span class="video-card-copy">
+              <span class="video-card-title">DiffusionGemma 2</span>
+              <span>Click to watch</span>
+            </span>
+          </button>
+          <button class="video-card video-open" type="button" data-video="assets/videos/dgemma_3.mp4" data-title="DiffusionGemma 3">
+            <video class="video-preview" muted loop preload="metadata" playsinline>
+              <source src="assets/videos/dgemma_3.mp4" type="video/mp4">
+            </video>
+            <span class="video-card-copy">
+              <span class="video-card-title">DiffusionGemma 3</span>
+              <span>Click to watch</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
     <section id="tldr">
       <h2>TL;DR</h2>
       <p>Block Diffusion Language Models (BD-LMs) make diffusion-based text generation more practical by supporting KV caching and flexible-length generation. However, native BD-LMs usually perform <strong>Single-Block Diffusion (SingleBD)</strong>: each forward pass refines one noisy block conditioned on a clean cached prefix. This preserves the serving benefits of BD-LMs, but blocks are still processed sequentially.</p>
       <p>We propose <strong>Multi-Block Diffusion Language Models (MBD-LMs)</strong>, a formulation and post-training recipe for reliable <strong>Multi-Block Diffusion (MultiBD)</strong>. On the model side, MBD-LMs are BD-LMs post-trained with <strong>Multi-block Teacher Forcing (MultiTF)</strong> so they can handle practical MultiBD running-set states. On the inference side, MBD-LMs decode a bounded running-set of consecutive blocks through an optimized <strong>Block Buffer</strong> runtime.</p>
-      <div class="definition-summary" aria-label="MBD-LMs definition">
+      <div class="definition-summary" role="group" aria-label="MBD-LMs definition">
         <div class="definition-summary-head">
           <span>MBD-LMs Definition</span>
           <strong>BD-LMs trained for MultiBD states, then executed by a MultiBD runtime.</strong>
@@ -82,19 +215,47 @@
       </figure>
     </section>
 
+    <section id="contributions" class="contribution-section">
+      <div class="section-kicker">Key Contributions</div>
+      <h2>What the Project Adds</h2>
+      <p class="section-lede">The useful takeaway from MBD-LMs is not just "decode more blocks." The project ties together a model-side training distribution, an inference-time running-set abstraction, and a runtime path that keeps the system executable.</p>
+      <div class="contribution-grid">
+        <article class="contribution-card">
+          <div class="contribution-index">01</div>
+          <h3>MultiBD formulation</h3>
+          <p>Reframes BD-LM generation as a bounded running-set of consecutive blocks, making inter-block parallelism explicit while preserving clean prefix KV semantics.</p>
+        </article>
+        <article class="contribution-card">
+          <div class="contribution-index">02</div>
+          <h3>MultiTF post-training</h3>
+          <p>Constructs inference-like noisy block groups with systematic/random layouts, heterogeneous slot-wise mask ratios, and group-aware dual-stream masking.</p>
+        </article>
+        <article class="contribution-card">
+          <div class="contribution-index">03</div>
+          <h3>Block Buffer runtime</h3>
+          <p>Executes MultiBD with fixed physical block slots, dummy-slot activation, prefix-cache reuse, decode-store overlap, and CUDA Graph-friendly shapes.</p>
+        </article>
+        <article class="contribution-card">
+          <div class="contribution-index">04</div>
+          <h3>Train-to-engine split</h3>
+          <p>Keeps method training in <code>mbd-lms</code> and runnable inference in Diffulex, so reproduction and new dLLM serving work have clear entry points.</p>
+        </article>
+      </div>
+    </section>
+
     <section id="decode-demo" class="demo-section">
       <div class="section-kicker demo-kicker">Interactive Decode Trace</div>
       <h2>Why MultiBD Removes the Store Bubble</h2>
       <p class="section-lede">Click through the same request under SingleBD and MultiBD. SingleBD can only refine one noisy block at a time; after the block is complete, it still spends a KV-store forward pass that produces no new output. MultiBD keeps a bounded running-set, admits the next block before the front block fully leaves the buffer, and overlaps KV storing with later-block decoding.</p>
 
-      <div class="decode-demo" aria-label="Interactive comparison between SingleBD and MultiBD">
+      <div class="decode-demo" role="group" aria-label="Interactive comparison between SingleBD and MultiBD">
         <div class="demo-topbar">
           <div>
             <div class="demo-step-label" id="demo-step-label">Step 1 of 6</div>
             <h3 id="demo-step-title">Start from a clean cached prefix</h3>
             <p id="demo-step-detail">Both methods refine block 1 conditioned on the prefix KV cache.</p>
           </div>
-          <div class="demo-controls" aria-label="Decode demo controls">
+          <div class="demo-controls" role="group" aria-label="Decode demo controls">
             <button type="button" id="demo-prev">Prev</button>
             <button type="button" id="demo-next">Next step</button>
             <button type="button" id="demo-reset">Reset</button>
@@ -112,7 +273,7 @@
               <div><span>Output</span><strong id="single-output">B1 token updates</strong></div>
               <div><span>KV action</span><strong id="single-kv">Read prefix KV</strong></div>
             </div>
-            <div class="block-track" aria-label="SingleBD block states">
+            <div class="block-track" role="group" aria-label="SingleBD block states">
               <div class="decode-block prefix-block state-prefix">
                 <span class="block-name">Prefix</span>
                 <span class="block-status">KV cached</span>
@@ -138,7 +299,7 @@
                 <span class="block-fill"></span>
               </div>
             </div>
-            <div class="timeline" data-timeline="single" aria-label="SingleBD timeline">
+            <div class="timeline" role="group" data-timeline="single" aria-label="SingleBD timeline">
               <span class="timeline-step">Decode B1</span>
               <span class="timeline-step">Decode B1</span>
               <span class="timeline-step">Finalize B1</span>
@@ -163,7 +324,7 @@
               <div><span>Output</span><strong id="multi-output">B1 token updates</strong></div>
               <div><span>KV action</span><strong id="multi-kv">Read prefix KV</strong></div>
             </div>
-            <div class="block-track" aria-label="MultiBD block states">
+            <div class="block-track" role="group" aria-label="MultiBD block states">
               <div class="decode-block prefix-block state-prefix">
                 <span class="block-name">Prefix</span>
                 <span class="block-status">KV cached</span>
@@ -189,7 +350,7 @@
                 <span class="block-fill"></span>
               </div>
             </div>
-            <div class="timeline" data-timeline="multi" aria-label="MultiBD timeline">
+            <div class="timeline" role="group" data-timeline="multi" aria-label="MultiBD timeline">
               <span class="timeline-step">Decode B1</span>
               <span class="timeline-step">Stabilize B1</span>
               <span class="timeline-step overlap-step">Admit B2</span>
@@ -231,7 +392,7 @@
       <p>MBD-LMs formulate BD-LM generation around a <strong>running-set</strong> of consecutive blocks. At decoding step <code>s</code>, the running-set contains the blocks that have not yet entered the prefix KV cache. It includes active noisy blocks and completed preceding blocks waiting to be cached. Blocks before the running-set form the clean cached prefix.</p>
       <p>This view unifies several regimes. Teacher-Forcing-trained BD-LMs correspond to the SingleBD extreme, where the model observes one noisy block conditioned on a clean cached prefix. D2F introduces visibility among multiple noisy blocks, but its training states still differ from practical MultiBD in running-set size and slot-wise noise patterns. Practical MultiBD is the bounded intermediate regime: the running-set should be larger than one to expose inter-block parallelism, but small enough to keep each forward pass efficient.</p>
       <figure class="figure">
-        <img src="assets/fig3_train_inference_paradigms.png" style="width:72%;" alt="Train-inference alignment across paradigms">
+        <img class="figure-narrow" src="assets/fig3_train_inference_paradigms.png" alt="Train-inference alignment across paradigms">
         <figcaption><strong>Figure 3.</strong> TF and D2F provide existing BD-LM training states, but neither directly matches practical MultiBD. MultiTF builds inference-like noise-groups with heterogeneous slot-wise noise patterns.</figcaption>
       </figure>
     </section>
@@ -322,6 +483,49 @@
           <p>Use Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main"><code>main</code></a> for engine development, open-source contributions, model support, kernel optimization, and new decoding algorithms that need to become real runnable systems.</p>
         </div>
       </div>
+      <div class="engine-proof">
+        <div class="table-wrap engine-proof-table-wrap">
+          <table class="engine-proof-table">
+            <caption>Full GSM8K test split, single active request, 1x A100-SXM4-80GB.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Run</th>
+                <th scope="col">Agg e2e TPS</th>
+                <th scope="col">Agg decode TPS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="diffulex-row">
+                <td>LLaDA2-mini / Diffulex</td>
+                <td>181.12</td>
+                <td>193.66</td>
+              </tr>
+              <tr>
+                <td>LLaDA2-mini / SGLang</td>
+                <td>177.48</td>
+                <td>194.78</td>
+              </tr>
+              <tr class="diffulex-row">
+                <td>DiffusionGemma / Diffulex</td>
+                <td>468.77</td>
+                <td>797.48</td>
+              </tr>
+              <tr>
+                <td>DiffusionGemma / vLLM</td>
+                <td>611.66</td>
+                <td>658.79</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="engine-proof-copy">
+          <div class="section-kicker engine-kicker">Single A100 GSM8K Stats</div>
+          <h3>Diffulex Runs at the Same Throughput Class as Mainstream dLLM Engines</h3>
+          <p>We ran the full GSM8K test split with 1,319 samples on a single NVIDIA A100-SXM4-80GB. The strict single-sample, single-active-request runs below focus on <strong>aggregate TPS</strong>: total tokens divided by total time. This is the more convincing throughput number because it is token/time weighted, instead of an average of per-request TPS values.</p>
+          <p>We include LLaDA2-mini and DiffusionGemma because they are the dLLM families most directly supported by SGLang and vLLM respectively. Under configurations aligned as closely as possible, Diffulex lands in the same performance range as these mainstream engines.</p>
+          <p>On aggregate e2e TPS, Diffulex reaches <strong>181.12</strong> on LLaDA2-mini, matching SGLang's <strong>177.48</strong>. On DiffusionGemma, Diffulex reaches <strong>797.48 aggregate decode TPS</strong>, ahead of vLLM's <strong>658.79</strong>, while vLLM leads on aggregate e2e TPS.</p>
+        </div>
+      </div>
       <div class="engine-actions">
         <a class="button engine" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Explore Diffulex Main</a>
         <a class="button engine secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce MBD-LMs</a>
@@ -332,31 +536,309 @@
       <h2>Main Results</h2>
       <p>The experiments evaluate mathematical reasoning on GSM8K and MATH500, and code generation on MBPP+ and HumanEval+. The paper reports Accuracy, Tokens Per Forward pass (TPF), and Accuracy Under Parallelism (AUP), where TPF measures decoding parallelism and AUP summarizes the accuracy-parallelism trade-off.</p>
       <p>The main trend is consistent across models: MBD-LMs substantially improve TPF over native SingleBD, and MultiTF often recovers or improves the quality lost by training-free MultiBD. On LLaDA2-Mini, MultiTF raises average accuracy from <strong>78.59%</strong> under training-free MultiBD to <strong>81.03%</strong>, while further increasing average TPF from <strong>4.41</strong> to <strong>6.19</strong>. On SDAR-8B-Chat-b32, MBD-SDAR-8B-Chat-b32 increases average TPF from <strong>2.54</strong> to <strong>4.46</strong> and improves average accuracy from <strong>69.00%</strong> to <strong>69.74%</strong>.</p>
-      <figure class="figure">
-        <img src="assets/table1_main_results.png" alt="Main evaluation results">
-        <figcaption><strong>Table 1.</strong> Evaluation results across math and code benchmarks. MBD-LMs consistently improve TPF over SingleBD and improve the accuracy-parallelism trade-off in most settings.</figcaption>
-      </figure>
+      <div class="result-highlights" role="group" aria-label="Selected result highlights">
+        <div class="result-highlight">
+          <span>Training-free MultiBD</span>
+          <strong>3.47 -> 4.41 TPF</strong>
+          <p>LLaDA2-Mini gains parallelism immediately, but accuracy drops before alignment training.</p>
+        </div>
+        <div class="result-highlight is-primary">
+          <span>MultiTF aligned</span>
+          <strong>4.41 -> 6.19 TPF</strong>
+          <p>MBD-LLaDA2-Mini recovers quality and raises average accuracy to 81.03%.</p>
+        </div>
+        <div class="result-highlight">
+          <span>DMax compatible</span>
+          <strong>9.34 TPF</strong>
+          <p>MBD-LLaDA2-Mini-DMax reaches the highest reported average parallelism.</p>
+        </div>
+      </div>
+      <div class="table-wrap result-table-wrap">
+        <table class="result-table">
+          <caption>Selected aggregate results from the reported math and code evaluations.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Model / Setting</th>
+              <th scope="col">Avg. Accuracy</th>
+              <th scope="col">Avg. TPF</th>
+              <th scope="col">Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>LLaDA2-Mini SingleBD</td>
+              <td>79.95%</td>
+              <td>3.47</td>
+              <td>Native one-block baseline.</td>
+            </tr>
+            <tr>
+              <td>LLaDA2-Mini training-free MultiBD</td>
+              <td>78.59%</td>
+              <td>4.41</td>
+              <td>Parallelism improves, but train-inference mismatch hurts quality.</td>
+            </tr>
+            <tr class="is-best">
+              <td>MBD-LLaDA2-Mini</td>
+              <td>81.03%</td>
+              <td>6.19</td>
+              <td>MultiTF aligns the model with practical MultiBD states.</td>
+            </tr>
+            <tr>
+              <td>SDAR-8B-Chat-b32 SingleBD</td>
+              <td>69.00%</td>
+              <td>2.54</td>
+              <td>Second-model baseline for transfer.</td>
+            </tr>
+            <tr class="is-best">
+              <td>MBD-SDAR-8B-Chat-b32</td>
+              <td>69.74%</td>
+              <td>4.46</td>
+              <td>Shows the same parallelism-quality trend beyond LLaDA2.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap paper-table-wrap">
+        <table class="paper-table main-results-table">
+          <caption><strong>Table 1.</strong> Evaluation results across math and code benchmarks. MBD-LMs consistently improve TPF over SingleBD and improve the accuracy-parallelism trade-off in most settings.</caption>
+          <thead>
+            <tr>
+              <th scope="col" rowspan="2">Model</th>
+              <th scope="col" colspan="2">GSM8K</th>
+              <th scope="col" colspan="2">MATH500</th>
+              <th scope="col" colspan="2">MBPP+</th>
+              <th scope="col" colspan="2">HumanEval+</th>
+              <th scope="col" colspan="3">Average</th>
+            </tr>
+            <tr>
+              <th scope="col">Acc</th>
+              <th scope="col">TPF</th>
+              <th scope="col">Acc</th>
+              <th scope="col">TPF</th>
+              <th scope="col">Acc</th>
+              <th scope="col">TPF</th>
+              <th scope="col">Acc</th>
+              <th scope="col">TPF</th>
+              <th scope="col">Acc</th>
+              <th scope="col">TPF</th>
+              <th scope="col">AUP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="paper-group-row"><th scope="rowgroup" colspan="12">LLaDA2-Mini-DMax <span>(bufsz=2, blksz=32)</span></th></tr>
+            <tr>
+              <td>SingleBD (Native)</td><td>91.89</td><td>5.70</td><td>76.80</td><td>6.13</td><td>72.22</td><td>6.14</td><td>77.44</td><td>7.44</td><td>79.59</td><td>6.35</td><td>459.54</td>
+            </tr>
+            <tr class="training-free-row">
+              <td>MultiBD (training-free)</td><td>89.84</td><td>8.76</td><td>73.80</td><td>9.08</td><td>72.22</td><td>8.44</td><td>76.83</td><td>10.96</td><td>78.17</td><td>9.31</td><td>651.98</td>
+            </tr>
+            <tr class="mbd-row">
+              <td>MBD-LLaDA2-Mini-DMax</td><td>91.74</td><td>8.95</td><td>75.00</td><td>9.31</td><td>70.11</td><td>8.34</td><td>77.44</td><td>10.78</td><td>78.57</td><td>9.34</td><td>661.28</td>
+            </tr>
+            <tr class="paper-group-row"><th scope="rowgroup" colspan="12">LLaDA2-Mini <span>(bufsz=2, blksz=32)</span></th></tr>
+            <tr>
+              <td>SingleBD (Native)</td><td>91.89</td><td>2.27</td><td>74.20</td><td>2.83</td><td>75.66</td><td>3.25</td><td>78.05</td><td>5.53</td><td>79.95</td><td>3.47</td><td>247.41</td>
+            </tr>
+            <tr class="training-free-row">
+              <td>MultiBD (training-free)</td><td>92.65</td><td>2.76</td><td>73.60</td><td>3.53</td><td>72.49</td><td>3.97</td><td>75.61</td><td>7.37</td><td>78.59</td><td>4.41</td><td>301.81</td>
+            </tr>
+            <tr class="mbd-row">
+              <td>MBD-LLaDA2-Mini</td><td>91.96</td><td>5.55</td><td>79.20</td><td>6.02</td><td>72.49</td><td>5.35</td><td>80.49</td><td>7.85</td><td>81.03</td><td>6.19</td><td>449.18</td>
+            </tr>
+            <tr class="paper-group-row"><th scope="rowgroup" colspan="12">SDAR-8B-Chat-b32 <span>(bufsz=4, blksz=32)</span></th></tr>
+            <tr>
+              <td>SingleBD (Native)</td><td>90.07</td><td>2.52</td><td>65.60</td><td>3.81</td><td>52.65</td><td>1.83</td><td>67.68</td><td>2.00</td><td>69.00</td><td>2.54</td><td>141.64</td>
+            </tr>
+            <tr class="training-free-row">
+              <td>MultiBD (training-free)</td><td>89.01</td><td>2.78</td><td>60.60</td><td>5.06</td><td>52.12</td><td>1.97</td><td>65.85</td><td>2.24</td><td>66.89</td><td>3.01</td><td>156.35</td>
+            </tr>
+            <tr class="mbd-row">
+              <td>MBD-SDAR-8B-Chat-b32</td><td>89.16</td><td>3.08</td><td>68.00</td><td>5.08</td><td>58.99</td><td>4.87</td><td>62.80</td><td>4.82</td><td>69.74</td><td>4.46</td><td>210.42</td>
+            </tr>
+            <tr class="paper-group-row"><th scope="rowgroup" colspan="12">SDAR-8B-Chat-b4 <span>(bufsz=4, blksz=4)</span></th></tr>
+            <tr>
+              <td>SingleBD (Native)</td><td>91.05</td><td>1.33</td><td>72.80</td><td>1.46</td><td>64.80</td><td>1.13</td><td>73.70</td><td>1.07</td><td>75.59</td><td>1.25</td><td>85.46</td>
+            </tr>
+            <tr class="training-free-row">
+              <td>MultiBD (training-free)</td><td>90.45</td><td>2.39</td><td>70.60</td><td>2.68</td><td>65.80</td><td>1.55</td><td>74.39</td><td>1.47</td><td>75.31</td><td>2.00</td><td>129.59</td>
+            </tr>
+            <tr class="mbd-row">
+              <td>MBD-SDAR-8B-Chat-b4</td><td>91.81</td><td>2.28</td><td>72.40</td><td>2.52</td><td>64.29</td><td>2.62</td><td>72.56</td><td>2.24</td><td>75.27</td><td>2.42</td><td>148.65</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p>Ablations further support the training-state alignment story. Combining systematic and random layouts gives the best AUP among the layout variants. Replacing the chain-uniform scheduler with other schedulers reduces the accuracy-parallelism trade-off; in particular, the D2F-style monotonic scheduler causes a large accuracy drop in the reported ablation, indicating that noisy-block visibility alone is not sufficient when slot-wise noise patterns are mismatched.</p>
-      <figure class="figure">
-        <img src="assets/table2_transfer_ablation.png" alt="Transfer and ablation results">
-        <figcaption><strong>Table 2.</strong> Training-free MultiBD transfers to additional model variants, while MultiTF component ablations show the role of layout construction and chain-uniform scheduling.</figcaption>
-      </figure>
+      <div class="table-stack">
+        <div class="table-wrap paper-table-wrap">
+          <table class="paper-table transfer-table">
+            <caption><strong>Table 2a.</strong> Training-free MultiBD transfers to additional model variants.</caption>
+            <thead>
+              <tr>
+                <th scope="col" rowspan="2">Model</th>
+                <th scope="col" colspan="2">GSM8K</th>
+                <th scope="col" colspan="2">MATH500</th>
+                <th scope="col" colspan="3">Average</th>
+              </tr>
+              <tr>
+                <th scope="col">Acc</th>
+                <th scope="col">TPF</th>
+                <th scope="col">Acc</th>
+                <th scope="col">TPF</th>
+                <th scope="col">Acc</th>
+                <th scope="col">TPF</th>
+                <th scope="col">AUP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="paper-group-row"><th scope="rowgroup" colspan="8">LLaDA2-Mini-CAP <span>(bufsz=2, blksz=32)</span></th></tr>
+              <tr>
+                <td>SingleBD (Native)</td><td>91.74</td><td>3.08</td><td>77.80</td><td>3.71</td><td>84.77</td><td>3.40</td><td>247.30</td>
+              </tr>
+              <tr class="training-free-row">
+                <td>MultiBD (training-free)</td><td>91.21</td><td>4.00</td><td>77.20</td><td>4.94</td><td>84.21</td><td>4.47</td><td>319.17</td>
+              </tr>
+              <tr class="paper-group-row"><th scope="rowgroup" colspan="8">LLaDA2.1-Mini <span>(bufsz=2, blksz=32)</span></th></tr>
+              <tr>
+                <td>SingleBD (Native)</td><td>93.03</td><td>4.12</td><td>81.40</td><td>4.87</td><td>87.22</td><td>4.50</td><td>390.64</td>
+              </tr>
+              <tr class="training-free-row">
+                <td>MultiBD (training-free)</td><td>92.27</td><td>5.80</td><td>81.00</td><td>7.20</td><td>86.63</td><td>6.50</td><td>558.52</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ablation-split">
+          <div class="table-wrap paper-table-wrap">
+            <table class="paper-table ablation-table">
+              <caption><strong>Table 2b-i.</strong> Noise-group layout construction ablation.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Configuration</th>
+                  <th scope="col">Acc</th>
+                  <th scope="col">TPF</th>
+                  <th scope="col">AUP</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>SingleBD (Native)</td><td>84.67</td><td>6.57</td><td>536.89</td>
+                </tr>
+                <tr>
+                  <td>+ systematic layouts</td><td>83.22</td><td>9.71</td><td>774.03</td>
+                </tr>
+                <tr>
+                  <td>+ random layouts</td><td>82.72</td><td>9.42</td><td>747.46</td>
+                </tr>
+                <tr class="mbd-row">
+                  <td>systematic + random layouts (ours)</td><td>84.59</td><td>9.87</td><td>805.34</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap paper-table-wrap">
+            <table class="paper-table ablation-table">
+              <caption><strong>Table 2b-ii.</strong> Block-level noise-scheduler ablation.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Configuration</th>
+                  <th scope="col">Acc</th>
+                  <th scope="col">TPF</th>
+                  <th scope="col">AUP</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>SingleBD (Native)</td><td>84.67</td><td>6.57</td><td>536.89</td>
+                </tr>
+                <tr>
+                  <td>D2F-style monotonic scheduler</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+                </tr>
+                <tr>
+                  <td>random scheduler</td><td>83.14</td><td>9.70</td><td>771.74</td>
+                </tr>
+                <tr>
+                  <td>sorted-uniform scheduler</td><td>81.28</td><td>9.73</td><td>748.73</td>
+                </tr>
+                <tr class="mbd-row">
+                  <td>chain-uniform scheduler (ours)</td><td>84.59</td><td>9.87</td><td>805.34</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="throughput">
       <h2>Throughput: From TPF to TPS</h2>
       <p>Higher TPF does not automatically imply proportional wall-clock speedup because MultiBD processes a larger static Block Buffer at each forward pass. The paper therefore separates useful committed tokens from the per-step computational workload. Increasing the buffer size can improve throughput when the useful-token gain outweighs the extra per-step cost introduced by resident blocks and dummy slots.</p>
-      <p>On the H100 TP=2 setup reported in Table 3, MBD-LLaDA2-Mini increases average TPF from <strong>3.47</strong> to <strong>6.19</strong> while step latency rises from <strong>7.07 ms</strong> to <strong>8.78 ms</strong>. The measured average TPS increases from <strong>517.16</strong> to <strong>745.92</strong>. With DMax, MBD-LLaDA2-Mini-DMax increases average TPF from <strong>6.35</strong> to <strong>9.34</strong>, and average TPS rises from <strong>779.49</strong> to <strong>926.67</strong> in the same table.</p>
-      <figure class="figure">
-        <img src="assets/table3_throughput.png" alt="Throughput and latency results">
-        <figcaption><strong>Table 3.</strong> Throughput and single-step latency comparison on two H100 GPUs with TP=2. MultiBD improves realized TPS despite increasing per-step latency.</figcaption>
-      </figure>
+      <p class="note"><strong>Engine version note.</strong> Table 3 was measured with the older Diffulex release used by the public <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms"><code>mbd-lms</code></a> reproduction branch. Current Diffulex is faster, but we have not refreshed this exact H100 TP=2 result because we do not currently have access to an H100 machine with CUDA 13 under the original setting.</p>
+      <p>On the legacy H100 TP=2 setup reported in Table 3, MBD-LLaDA2-Mini increases average TPF from <strong>3.47</strong> to <strong>6.19</strong> while step latency rises from <strong>7.07 ms</strong> to <strong>8.78 ms</strong>. The measured average TPS increases from <strong>517.16</strong> to <strong>745.92</strong>. With DMax, MBD-LLaDA2-Mini-DMax increases average TPF from <strong>6.35</strong> to <strong>9.34</strong>, and average TPS rises from <strong>779.49</strong> to <strong>926.67</strong> in the same table.</p>
+      <div class="throughput-strip" role="group" aria-label="Throughput highlights">
+        <div>
+          <span>MBD-LLaDA2-Mini</span>
+          <strong>517.16 -> 745.92 TPS</strong>
+        </div>
+        <div>
+          <span>MBD-LLaDA2-Mini-DMax</span>
+          <strong>779.49 -> 926.67 TPS</strong>
+        </div>
+        <div>
+          <span>Hardware</span>
+          <strong>2x H100, TP=2</strong>
+        </div>
+      </div>
+      <div class="table-wrap paper-table-wrap">
+        <table class="paper-table throughput-table">
+          <caption><strong>Table 3.</strong> Throughput and single-step latency comparison on two H100 GPUs with TP=2, measured with the older Diffulex <code>mbd-lms</code> branch used for reproduction. MultiBD improves realized TPS despite increasing per-step latency.</caption>
+          <thead>
+            <tr>
+              <th scope="col" rowspan="2">Model</th>
+              <th scope="col" colspan="4">Forward-step statistics</th>
+              <th scope="col" colspan="6">Realized throughput</th>
+            </tr>
+            <tr>
+              <th scope="col">Avg. TPF</th>
+              <th scope="col">TPF Gain</th>
+              <th scope="col">Step Lat. (ms)</th>
+              <th scope="col">Lat. Cost</th>
+              <th scope="col">GSM8K TPS</th>
+              <th scope="col">MATH500 TPS</th>
+              <th scope="col">MBPP+ TPS</th>
+              <th scope="col">HumanEval+ TPS</th>
+              <th scope="col">Avg. TPS</th>
+              <th scope="col">TPS Gain</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>LLaDA2-Mini</td><td>3.47</td><td>&mdash;</td><td>7.07</td><td>1.00x</td><td>344.05</td><td>403.45</td><td>496.19</td><td>824.94</td><td>517.16</td><td>&mdash;</td>
+            </tr>
+            <tr class="mbd-row">
+              <td>MBD-LLaDA2-Mini</td><td>6.19</td><td>+78.39%</td><td>8.78</td><td>1.24x</td><td>687.87</td><td>707.89</td><td>646.73</td><td>941.18</td><td>745.92</td><td>+44.24%</td>
+            </tr>
+            <tr>
+              <td>LLaDA2-Mini-DMax</td><td>6.35</td><td>+83.00%</td><td>9.02</td><td>1.28x</td><td>700.82</td><td>730.60</td><td>754.97</td><td>931.55</td><td>779.49</td><td>+50.73%</td>
+            </tr>
+            <tr class="mbd-row">
+              <td>MBD-LLaDA2-Mini-DMax</td><td>9.34</td><td>+169.16%</td><td>11.20</td><td>1.58x</td><td>834.52</td><td>851.07</td><td>896.65</td><td>1124.43</td><td>926.67</td><td>+79.19%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section id="citation" class="compact">
       <h2>Citation</h2>
       <p>The current draft does not include an official BibTeX entry. Please add the official citation after the paper is publicly released.</p>
-      <pre><code>% TODO: add official BibTeX after release</code></pre>
+      <div class="citation-box">
+        <div class="citation-box-head">
+          <span>BibTeX placeholder</span>
+          <button type="button" id="copy-bibtex" aria-label="Copy BibTeX placeholder">Copy</button>
+        </div>
+        <pre><code id="bibtex-code">% TODO: add official BibTeX after release</code></pre>
+      </div>
       <h3>References</h3>
       <ol>
         <li>Marianne Arriola et al. <em>Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models</em>. ICLR, 2025.</li>
@@ -367,6 +849,19 @@
       </ol>
     </section>
   </main>
+
+  <div class="video-modal" id="video-modal" hidden>
+    <div class="video-modal-backdrop" data-video-close></div>
+    <div class="video-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="video-modal-title">
+      <div class="video-modal-head">
+        <h2 id="video-modal-title">Demo Video</h2>
+        <button type="button" class="video-modal-close" data-video-close aria-label="Close video">Close</button>
+      </div>
+      <video id="modal-video" controls playsinline>
+        <source id="modal-video-source" src="" type="video/mp4">
+      </video>
+    </div>
+  </div>
 
   <footer>
     <div class="container">
@@ -773,7 +1268,62 @@
         render();
       });
 
+      document.getElementById("copy-bibtex")?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        const text = document.getElementById("bibtex-code")?.textContent ?? "";
+        try {
+          await navigator.clipboard.writeText(text);
+          button.textContent = "Copied";
+        } catch {
+          button.textContent = "Unavailable";
+        }
+        window.setTimeout(() => {
+          button.textContent = "Copy";
+        }, 1600);
+      });
+
+      const modal = document.getElementById("video-modal");
+      const modalVideo = document.getElementById("modal-video");
+      const modalSource = document.getElementById("modal-video-source");
+      const modalTitle = document.getElementById("video-modal-title");
+
+      const closeVideo = () => {
+        if (!modal || !modalVideo || !modalSource) return;
+        modal.hidden = true;
+        document.body.classList.remove("modal-open");
+        modalVideo.pause();
+        modalSource.removeAttribute("src");
+        modalVideo.load();
+      };
+
+      const openVideo = (trigger) => {
+        if (!modal || !modalVideo || !modalSource || !modalTitle) return;
+        const src = trigger.dataset.video;
+        if (!src) return;
+        modalTitle.textContent = trigger.dataset.title || "Demo Video";
+        modalSource.src = src;
+        modal.hidden = false;
+        document.body.classList.add("modal-open");
+        modalVideo.load();
+        modalVideo.play().catch(() => {});
+      };
+
+      document.querySelectorAll(".video-open").forEach((trigger) => {
+        trigger.addEventListener("click", () => openVideo(trigger));
+      });
+
+      document.querySelectorAll("[data-video-close]").forEach((trigger) => {
+        trigger.addEventListener("click", closeVideo);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeVideo();
+      });
+
       render();
+      document.querySelectorAll(".video-preview").forEach((video) => {
+        video.play().catch(() => {});
+      });
     })();
   </script>
 </body>
