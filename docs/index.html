@@ -40,6 +40,7 @@
   <nav class="nav" aria-label="Page navigation">
     <div class="container">
       <a href="#tldr">TL;DR</a>
+      <a href="#decode-demo">Decode Demo</a>
       <a href="#motivation">Motivation</a>
       <a href="#formulation">MBD-LMs</a>
       <a href="#multitf">MultiTF</a>
@@ -79,6 +80,117 @@
         <img src="assets/fig1_singlebd_vs_multibd.png" alt="SingleBD versus MultiBD">
         <figcaption><strong>Figure 1.</strong> SingleBD decodes blocks sequentially and creates KV-cache storing bubbles. MultiBD overlaps future-block refinement with KV-cache storing of completed blocks, enabling inter-block parallelism.</figcaption>
       </figure>
+    </section>
+
+    <section id="decode-demo" class="demo-section">
+      <div class="section-kicker demo-kicker">Interactive Decode Trace</div>
+      <h2>Why MultiBD Removes the Store Bubble</h2>
+      <p class="section-lede">Click through the same request under SingleBD and MultiBD. SingleBD can only refine one noisy block at a time; after the block is complete, it still spends a KV-store forward pass that produces no new output. MultiBD keeps a bounded running-set, admits the next block before the front block fully leaves the buffer, and overlaps KV storing with later-block decoding.</p>
+
+      <div class="decode-demo" aria-label="Interactive comparison between SingleBD and MultiBD">
+        <div class="demo-topbar">
+          <div>
+            <div class="demo-step-label" id="demo-step-label">Step 1 of 6</div>
+            <h3 id="demo-step-title">Start from a clean cached prefix</h3>
+            <p id="demo-step-detail">Both methods refine block 1 conditioned on the prefix KV cache.</p>
+          </div>
+          <div class="demo-controls" aria-label="Decode demo controls">
+            <button type="button" id="demo-prev">Prev</button>
+            <button type="button" id="demo-next">Next step</button>
+            <button type="button" id="demo-reset">Reset</button>
+          </div>
+        </div>
+
+        <div class="demo-stage">
+          <article class="decode-panel single-panel" aria-label="SingleBD trace">
+            <div class="decode-panel-head">
+              <span class="panel-tag single-tag">BD-LM / SingleBD</span>
+              <strong id="single-phase">Decode B1 only</strong>
+            </div>
+            <div class="panel-summary">
+              <div><span>Forward</span><strong id="single-forward">B1 denoising</strong></div>
+              <div><span>Output</span><strong id="single-output">B1 token updates</strong></div>
+              <div><span>KV action</span><strong id="single-kv">Read prefix KV</strong></div>
+            </div>
+            <div class="block-track" aria-label="SingleBD block states">
+              <div class="decode-block prefix-block state-prefix">
+                <span class="block-name">Prefix</span>
+                <span class="block-status">KV cached</span>
+              </div>
+              <div class="decode-block" id="single-b1">
+                <span class="block-name">Block 1</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
+              <div class="decode-block" id="single-b2">
+                <span class="block-name">Block 2</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
+              <div class="decode-block" id="single-b3">
+                <span class="block-name">Block 3</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
+            </div>
+            <div class="timeline" data-timeline="single" aria-label="SingleBD timeline">
+              <span class="timeline-step">Decode B1</span>
+              <span class="timeline-step">Decode B1</span>
+              <span class="timeline-step">Finalize B1</span>
+              <span class="timeline-step bubble-step">Store B1 only</span>
+              <span class="timeline-step">Decode B2</span>
+              <span class="timeline-step bubble-step">Store B2 only</span>
+            </div>
+            <p class="panel-note" id="single-note">Later blocks wait until block 1 is stored into KV.</p>
+          </article>
+
+          <article class="decode-panel multi-panel" aria-label="MultiBD trace">
+            <div class="decode-panel-head">
+              <span class="panel-tag multi-tag">MBD-LM / MultiBD</span>
+              <strong id="multi-phase">Decode B1 in a buffer</strong>
+            </div>
+            <div class="panel-summary">
+              <div><span>Forward</span><strong id="multi-forward">B1 denoising</strong></div>
+              <div><span>Output</span><strong id="multi-output">B1 token updates</strong></div>
+              <div><span>KV action</span><strong id="multi-kv">Read prefix KV</strong></div>
+            </div>
+            <div class="block-track" aria-label="MultiBD block states">
+              <div class="decode-block prefix-block state-prefix">
+                <span class="block-name">Prefix</span>
+                <span class="block-status">KV cached</span>
+              </div>
+              <div class="decode-block" id="multi-b1">
+                <span class="block-name">Block 1</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
+              <div class="decode-block" id="multi-b2">
+                <span class="block-name">Block 2</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
+              <div class="decode-block" id="multi-b3">
+                <span class="block-name">Block 3</span>
+                <span class="block-status"></span>
+                <span class="block-fill"></span>
+              </div>
+            </div>
+            <div class="timeline" data-timeline="multi" aria-label="MultiBD timeline">
+              <span class="timeline-step">Decode B1</span>
+              <span class="timeline-step">Decode B1</span>
+              <span class="timeline-step overlap-step">Decode B1+B2</span>
+              <span class="timeline-step overlap-step">Store B1 + Decode B2</span>
+              <span class="timeline-step overlap-step">Decode B2+B3</span>
+              <span class="timeline-step overlap-step">Store B2 + Decode B3</span>
+            </div>
+            <p class="panel-note" id="multi-note">The next block is already inside the running-set before block 1 leaves the buffer.</p>
+          </article>
+        </div>
+
+        <div class="demo-takeaway" id="demo-takeaway">
+          <strong>Takeaway:</strong> MultiBD turns the store-only bubble into useful later-block decoding work.
+        </div>
+      </div>
     </section>
 
     <section id="motivation">
@@ -243,5 +355,264 @@
       Multi-Block Diffusion Language Models. Train with <a href="https://github.com/SJTU-DENG-Lab/mbd-lms">mbd-lms</a>; reproduce with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Diffulex mbd-lms</a>; develop with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex main</a>.
     </div>
   </footer>
+  <script>
+    (() => {
+      const steps = [
+        {
+          title: "Start from a clean cached prefix",
+          detail: "Both methods refine block 1 conditioned on the prefix KV cache.",
+          takeaway: "Both systems begin the same way: one clean prefix, one noisy block.",
+          single: {
+            phase: "Decode B1 only",
+            forward: "B1 denoising",
+            output: "B1 token updates",
+            kv: "Read prefix KV",
+            note: "Later blocks wait until block 1 is stored into KV.",
+            timeline: 0,
+            blocks: {
+              b1: ["active", "Denoising", 32],
+              b2: ["waiting", "Not admitted", 0],
+              b3: ["future", "Future", 0]
+            }
+          },
+          multi: {
+            phase: "Decode B1 in a buffer",
+            forward: "B1 denoising",
+            output: "B1 token updates",
+            kv: "Read prefix KV",
+            note: "The buffer already reserves physical slots for later blocks.",
+            timeline: 0,
+            blocks: {
+              b1: ["active", "Denoising", 32],
+              b2: ["dummy", "Dummy slot", 0],
+              b3: ["future", "Future", 0]
+            }
+          }
+        },
+        {
+          title: "Iterate inside block 1",
+          detail: "SingleBD still owns only one active block. MultiBD keeps static buffer capacity ready for expansion.",
+          takeaway: "SingleBD has intra-block parallelism only; MultiBD prepares a running-set.",
+          single: {
+            phase: "Continue B1",
+            forward: "B1 denoising",
+            output: "B1 token updates",
+            kv: "Read prefix KV",
+            note: "Block 2 cannot start while block 1 is still the active block.",
+            timeline: 1,
+            blocks: {
+              b1: ["active", "More stable", 58],
+              b2: ["waiting", "Not admitted", 0],
+              b3: ["future", "Future", 0]
+            }
+          },
+          multi: {
+            phase: "Continue B1",
+            forward: "B1 denoising",
+            output: "B1 token updates",
+            kv: "Read prefix KV",
+            note: "The next slot remains a cheap placeholder until it is activated.",
+            timeline: 1,
+            blocks: {
+              b1: ["active", "More stable", 58],
+              b2: ["dummy", "Ready slot", 0],
+              b3: ["future", "Future", 0]
+            }
+          }
+        },
+        {
+          title: "Admit the next block before the front block leaves",
+          detail: "When block 1 becomes sufficiently stable, MultiBD activates block 2 in the running-set. SingleBD still cannot touch block 2.",
+          takeaway: "This is where inter-block parallelism appears: B1 and B2 are refined together.",
+          single: {
+            phase: "Finalize B1",
+            forward: "B1 final denoising",
+            output: "B1 final tokens",
+            kv: "Read prefix KV",
+            note: "The next forward is still required only to store block 1 KV.",
+            timeline: 2,
+            blocks: {
+              b1: ["ready", "Complete", 100],
+              b2: ["waiting", "Not admitted", 0],
+              b3: ["future", "Future", 0]
+            }
+          },
+          multi: {
+            phase: "Decode B1 + B2",
+            forward: "Joint denoising",
+            output: "B1 + B2 updates",
+            kv: "Read prefix KV",
+            note: "Block 2 starts receiving useful decode work before block 1 is committed.",
+            timeline: 2,
+            blocks: {
+              b1: ["ready", "Complete", 100],
+              b2: ["active", "Denoising", 30],
+              b3: ["dummy", "Dummy slot", 0]
+            }
+          }
+        },
+        {
+          title: "SingleBD hits a KV-store-only forward",
+          detail: "Native BD-LM serving must run an extra forward to materialize block 1 into KV. That forward produces no new output. MultiBD overlaps the same KV-store work with block 2 decoding.",
+          takeaway: "The store bubble becomes useful work: store B1 KV while decoding B2.",
+          single: {
+            phase: "Store B1 only",
+            forward: "KV-store forward",
+            output: "No output",
+            kv: "Store B1 KV",
+            note: "This is the store bubble: the GPU runs a forward, but the request does not advance visible generation.",
+            timeline: 3,
+            blocks: {
+              b1: ["bubble", "Store KV", 100],
+              b2: ["waiting", "Still waiting", 0],
+              b3: ["future", "Future", 0]
+            }
+          },
+          multi: {
+            phase: "Store B1 + Decode B2",
+            forward: "Overlap forward",
+            output: "B2 token updates",
+            kv: "Store B1 KV",
+            note: "Block 1 is a pure KV lane, while block 2 keeps decoding in the same step.",
+            timeline: 3,
+            blocks: {
+              b1: ["store", "Store KV", 100],
+              b2: ["active", "Denoising", 62],
+              b3: ["dummy", "Ready slot", 0]
+            }
+          }
+        },
+        {
+          title: "The next block is already ahead",
+          detail: "After block 1 enters KV, SingleBD only begins block 2. MultiBD has already spent useful forwards on block 2 and can activate block 3.",
+          takeaway: "MultiBD shortens the idle gap between consecutive blocks.",
+          single: {
+            phase: "Start B2",
+            forward: "B2 denoising",
+            output: "B2 token updates",
+            kv: "Read prefix+B1 KV",
+            note: "Block 2 starts after block 1 has fully left the decode path.",
+            timeline: 4,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["active", "Denoising", 30],
+              b3: ["waiting", "Not admitted", 0]
+            }
+          },
+          multi: {
+            phase: "Decode B2 + B3",
+            forward: "Joint denoising",
+            output: "B2 + B3 updates",
+            kv: "Read prefix+B1 KV",
+            note: "The buffer slides forward and activates the next dummy slot.",
+            timeline: 4,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["active", "Mostly stable", 82],
+              b3: ["active", "Denoising", 26]
+            }
+          }
+        },
+        {
+          title: "The pattern repeats",
+          detail: "SingleBD repeatedly alternates decode and store-only forwards. MultiBD keeps a small running-set so later blocks can decode while earlier blocks are committed.",
+          takeaway: "MBD-LMs convert sequential block processing into bounded inter-block parallelism.",
+          single: {
+            phase: "Store B2 only",
+            forward: "KV-store forward",
+            output: "No output",
+            kv: "Store B2 KV",
+            note: "Each completed block creates another store-only bubble.",
+            timeline: 5,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["bubble", "Store KV", 100],
+              b3: ["waiting", "Still waiting", 0]
+            }
+          },
+          multi: {
+            phase: "Store B2 + Decode B3",
+            forward: "Overlap forward",
+            output: "B3 token updates",
+            kv: "Store B2 KV",
+            note: "The front block commits to KV while the tail block keeps making progress.",
+            timeline: 5,
+            blocks: {
+              b1: ["prefix", "In KV", 100],
+              b2: ["store", "Store KV", 100],
+              b3: ["active", "Denoising", 58]
+            }
+          }
+        }
+      ];
+
+      const stateClass = (state) => `decode-block state-${state}`;
+      let current = 0;
+
+      const setText = (id, text) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = text;
+      };
+
+      const setBlock = (side, name, block) => {
+        const node = document.getElementById(`${side}-${name}`);
+        if (!node) return;
+        const [state, status, fill] = block;
+        node.className = stateClass(state);
+        node.style.setProperty("--fill", `${fill}%`);
+        const statusNode = node.querySelector(".block-status");
+        if (statusNode) statusNode.textContent = status;
+      };
+
+      const setTimeline = (side, activeIndex) => {
+        document.querySelectorAll(`[data-timeline="${side}"] .timeline-step`).forEach((node, index) => {
+          node.classList.toggle("is-active", index === activeIndex);
+          node.classList.toggle("is-done", index < activeIndex);
+        });
+      };
+
+      const setPanel = (side, data) => {
+        setText(`${side}-phase`, data.phase);
+        setText(`${side}-forward`, data.forward);
+        setText(`${side}-output`, data.output);
+        setText(`${side}-kv`, data.kv);
+        setText(`${side}-note`, data.note);
+        Object.entries(data.blocks).forEach(([name, block]) => setBlock(side, name, block));
+        setTimeline(side, data.timeline);
+      };
+
+      const render = () => {
+        const step = steps[current];
+        setText("demo-step-label", `Step ${current + 1} of ${steps.length}`);
+        setText("demo-step-title", step.title);
+        setText("demo-step-detail", step.detail);
+        setText("demo-takeaway", `Takeaway: ${step.takeaway}`);
+        setPanel("single", step.single);
+        setPanel("multi", step.multi);
+
+        const prev = document.getElementById("demo-prev");
+        const next = document.getElementById("demo-next");
+        if (prev) prev.disabled = current === 0;
+        if (next) next.textContent = current === steps.length - 1 ? "Replay" : "Next step";
+      };
+
+      document.getElementById("demo-prev")?.addEventListener("click", () => {
+        current = Math.max(0, current - 1);
+        render();
+      });
+
+      document.getElementById("demo-next")?.addEventListener("click", () => {
+        current = current === steps.length - 1 ? 0 : current + 1;
+        render();
+      });
+
+      document.getElementById("demo-reset")?.addEventListener("click", () => {
+        current = 0;
+        render();
+      });
+
+      render();
+    })();
+  </script>
 </body>
 </html>
