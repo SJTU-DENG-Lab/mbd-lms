@@ -189,6 +189,18 @@ h1 {
   background: #fff1f2;
 }
 
+.button.hf,
+.button.hf:visited {
+  border-color: #d97706;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.button.hf:hover {
+  border-color: #b45309;
+  background: #fef3c7;
+}
+
 .button.disabled {
   border-color: var(--line);
   background: #eef1f5;
