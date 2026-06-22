@@ -81,6 +81,13 @@ cd Diffulex
 git checkout mbd-lms
 ```
 
+**Reproducibility note.** The scores and throughput numbers reported in the
+paper were produced with the Diffulex `mbd-lms` branch. Use this branch to
+reproduce the paper tables, including the throughput table. The actively
+optimized Diffulex `main` branch may produce different latency, TPS, or
+benchmark numbers because the runtime has continued to change after the paper
+experiments.
+
 ### Engine Development
 
 For new runtime features, open-source contributions, and new dLLM decoding
@@ -153,7 +160,11 @@ MBD-LMs consistently improve decoding parallelism over native SingleBD. MultiTF 
 
 ### Throughput
 
-Throughput is measured for single-sample decoding on two H100 GPUs with tensor parallelism degree 2.
+Throughput is measured for single-sample decoding on two H100 GPUs with tensor
+parallelism degree 2. These are paper-reproduction numbers from the Diffulex
+`mbd-lms` branch. For exact reproduction, use that branch rather than the
+actively optimized Diffulex `main` branch; newer engine versions may differ
+from the reported table.
 
 | Model | Avg. TPF | Step Latency | Avg. TPS |
 |---|---:|---:|---:|
