@@ -7,8 +7,8 @@
   <a href="https://sjtu-deng-lab.github.io/blogs/mbd/">
     <img src="https://img.shields.io/badge/Blog-Post-blueviolet" alt="Blog">
   </a>
-  <a href="#">
-    <img src="https://img.shields.io/badge/Paper-Coming%20Soon-lightgrey" alt="Paper">
+  <a href="paper/MBD-LMs.pdf">
+    <img src="https://img.shields.io/badge/Paper-PDF-b91c1c" alt="Paper PDF">
   </a>
   <a href="https://github.com/SJTU-DENG-Lab/mbd-lms">
     <img src="https://img.shields.io/badge/Training%20Code-mbd--lms-0f766e" alt="MBD-LMs Training Code">
