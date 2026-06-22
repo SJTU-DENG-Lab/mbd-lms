@@ -39,3 +39,4 @@ Thumbs.db
 
 # Cutomized
 dataset/*.jsonl
+*.mov
