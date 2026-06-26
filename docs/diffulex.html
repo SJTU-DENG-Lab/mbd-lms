@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Diffulex — a runnable inference engine for block-style diffusion language models.">
+  <title>Diffulex Engine — Multi-Block Diffusion Language Models</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="side-toc" aria-label="Table of contents">
+    <ol>
+      <li><a href="#intro"><span class="toc-num">1</span> Intro</a></li>
+      <li><a href="#engine"><span class="toc-num">2</span> Engine</a></li>
+      <li><a href="#connection"><span class="toc-num">3</span> Connection</a></li>
+    </ol>
+  </nav>
+  <nav class="nav" aria-label="Site navigation">
+    <div class="container">
+      <a class="nav-logo" href="https://sjtu-deng-lab.github.io/" aria-label="DENG Lab website">
+        <img src="assets/sjtu-deng-lab-logo.png" alt="DENG Lab">
+      </a>
+      <a href="index.html">Home</a>
+      <a href="videos.html">Videos</a>
+      <a href="mbd-lms.html">MBD-LMs</a>
+      <a href="diffulex.html" class="is-current">Diffulex Engine</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section id="intro" class="engine-section">
+      <div class="engine-kicker">Inference Engine</div>
+      <h2>1. Diffulex Is Where MBD-LMs Become Runnable</h2>
+      <p class="engine-lede">Train and define the method in <code>mbd-lms</code>; reproduce, serve, profile, and extend MultiBD systems through Diffulex.</p>
+
+      <div class="engine-banner">
+        <div class="engine-banner-label">Inference Engine</div>
+        <div class="engine-banner-main">
+          <div class="engine-banner-copy">
+            <strong>Diffulex is where MBD-LMs become runnable.</strong>
+            <p>Train and define the method in <code>mbd-lms</code>; reproduce, serve, profile, and extend MultiBD systems through Diffulex.</p>
+          </div>
+          <div class="engine-banner-actions">
+            <a class="button engine" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Open Diffulex Engine</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="engine">
+      <h2>2. Diffulex Is Built for Research-Grade dLLM Inference</h2>
+      <p class="engine-lede">Diffulex is a flexible and extensible inference engine for block-style diffusion language models. The MBD-LMs paradigm provides a broad reference frame for implementing and comparing dLLM inference mechanisms, from SingleBD and MultiBD to future DualCache-style cache designs, TokenMerge decoding, Edit refinement, and Uniform DLM paths such as DiffusionGemma.</p>
+      <div class="grid engine-grid">
+        <div class="card engine-card">
+          <h3>Paradigm coverage</h3>
+          <p>SingleBD, MultiBD, DualCache-style cache behavior, TokenMerge, Edit decoding, and Uniform DLM runtimes can be expressed through strategy-specific request state, schedulers, KV cache managers, model runners, and samplers.</p>
+        </div>
+        <div class="card engine-card">
+          <h3>Extension-friendly engine</h3>
+          <p>The engine separates algorithm semantics from systems concerns such as prefix caching, paged attention, CUDA Graph-friendly execution, batching, benchmarking, and HTTP serving.</p>
+        </div>
+        <div class="card engine-card">
+          <h3>Agent-assisted research</h3>
+          <p>With the existing strategy implementations as references, researchers can efficiently use coding agents such as Claude Code or Codex to add new algorithms and quickly turn them into runnable, measurable systems.</p>
+        </div>
+      </div>
+      <div class="engine-split">
+        <div>
+          <h3>For Reproduction</h3>
+          <p>Use the Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms"><code>mbd-lms</code></a> branch to reproduce the reported MBD-LMs experiments. This branch keeps configs and runtime assumptions aligned with the paper setup.</p>
+        </div>
+        <div>
+          <h3>For New Systems Work</h3>
+          <p>Use Diffulex <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main"><code>main</code></a> for engine development, open-source contributions, model support, kernel optimization, and new decoding algorithms that need to become real runnable systems.</p>
+        </div>
+      </div>
+      <div class="engine-proof">
+        <div class="table-wrap engine-proof-table-wrap">
+          <table class="engine-proof-table">
+            <caption>Full GSM8K test split, single active request, 1x A100-SXM4-80GB.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Run</th>
+                <th scope="col">Agg e2e TPS</th>
+                <th scope="col">Agg decode TPS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="diffulex-row">
+                <td>LLaDA2-mini / Diffulex</td>
+                <td>181.12</td>
+                <td>193.66</td>
+              </tr>
+              <tr>
+                <td>LLaDA2-mini / SGLang</td>
+                <td>177.48</td>
+                <td>194.78</td>
+              </tr>
+              <tr class="diffulex-row">
+                <td>DiffusionGemma / Diffulex</td>
+                <td>468.77</td>
+                <td>797.48</td>
+              </tr>
+              <tr>
+                <td>DiffusionGemma / vLLM</td>
+                <td>611.66</td>
+                <td>658.79</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="engine-proof-copy">
+          <div class="engine-kicker">Single A100 GSM8K Stats</div>
+          <h3>Diffulex Runs at the Same Throughput Class as Mainstream dLLM Engines</h3>
+          <p>We ran the full GSM8K test split with 1,319 samples on a single NVIDIA A100-SXM4-80GB. The strict single-sample, single-active-request runs below focus on <strong>aggregate TPS</strong>: total tokens divided by total time. This is the more convincing throughput number because it is token/time weighted, instead of an average of per-request TPS values.</p>
+          <p>We include LLaDA2-mini and DiffusionGemma because they are the dLLM families most directly supported by SGLang and vLLM respectively. Under configurations aligned as closely as possible, Diffulex lands in the same performance range as these mainstream engines.</p>
+          <p>On aggregate e2e TPS, Diffulex reaches <strong>181.12</strong> on LLaDA2-mini, matching SGLang's <strong>177.48</strong>. On DiffusionGemma, Diffulex reaches <strong>797.48 aggregate decode TPS</strong>, ahead of vLLM's <strong>658.79</strong>, while vLLM leads on aggregate e2e TPS.</p>
+        </div>
+      </div>
+      <div class="engine-actions">
+        <a class="button engine" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Explore Diffulex Main</a>
+        <a class="button engine secondary" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Reproduce MBD-LMs</a>
+      </div>
+    </section>
+
+    <section id="connection">
+      <h2>3. How It Fits Together</h2>
+      <p><strong>mbd-lms</strong> (the training repo) defines MultiTF and produces MBD-LM checkpoints. <strong>Diffulex</strong> (this engine) loads those checkpoints and executes them with MultiBD, Block Buffer, prefix caching, and CUDA Graph support. The two repositories are separate because the method definition and the runtime system have different audiences and development cadences.</p>
+      <div class="engine-actions">
+        <a class="button" href="https://github.com/SJTU-DENG-Lab/mbd-lms">Training Repo (mbd-lms)</a>
+        <a class="button engine" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Engine Repo (Diffulex)</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      Multi-Block Diffusion Language Models. Train with <a href="https://github.com/SJTU-DENG-Lab/mbd-lms">mbd-lms</a>; reproduce with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/mbd-lms">Diffulex mbd-lms</a>; develop with <a href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Diffulex main</a>.
+    </div>
+  </footer>
+  <script>
+    (() => {
+      const tocLinks = document.querySelectorAll(".side-toc a");
+      const sections = [...tocLinks].map((a) => document.querySelector(a.getAttribute("href")));
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const id = entry.target.getAttribute("id");
+            const link = document.querySelector(`.side-toc a[href="#${id}"]`);
+            if (link) link.classList.toggle("is-visible", entry.isIntersecting);
+          });
+        },
+        { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+      );
+
+      sections.forEach((s) => s && observer.observe(s));
+    })();
+  </script>
+</body>
+</html>
