@@ -15,7 +15,7 @@
     <ol>
       <li><a href="#intro"><span class="toc-num">1</span> Intro</a></li>
       <li><a href="#engine"><span class="toc-num">2</span> Engine</a></li>
-      <li><a href="#connection"><span class="toc-num">3</span> Connection</a></li>
+      <li><a href="#backend"><span class="toc-num">3</span> Core Backend</a></li>
     </ol>
   </nav>
   <nav class="nav" aria-label="Site navigation">
@@ -52,12 +52,58 @@
 
     <section id="engine">
       <h2>2. Diffulex Is Built for Research-Grade dLLM Inference</h2>
-      <p class="engine-lede">Diffulex is a flexible and extensible inference engine for block-style diffusion language models. The MBD-LMs paradigm provides a broad reference frame for implementing and comparing dLLM inference mechanisms, from SingleBD and MultiBD to future DualCache-style cache designs, TokenMerge decoding, Edit refinement, and Uniform DLM paths such as DiffusionGemma.</p>
+      <p class="engine-lede">Diffulex is a flexible and extensible inference engine for block-style diffusion language models. It unifies a wide range of decoding paradigms under a single runtime: <strong>MultiBD</strong> (BufSz=1 reduces to SingleBD; BufSz=4 enables full multi-block concurrency), <strong>Token Merge</strong>, <strong>Edit Sampling</strong>, <strong>D2F MultiBD</strong>, and native <strong>DiffusionGemma</strong> inference. Each strategy composes with model-specific samplers, KV cache managers, and schedulers — all selectable via <code>decoding_strategy</code>.</p>
+
+      <h3>Core Inference Strategies</h3>
+      <div class="table-wrap">
+        <table class="model-table">
+          <thead>
+            <tr>
+              <th scope="col">Strategy</th>
+              <th scope="col"><code>decoding_strategy</code></th>
+              <th scope="col"><code>sampling_mode</code></th>
+              <th scope="col">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Multi-Block Diffusion</td><td><code>multi_bd</code></td><td>&mdash;</td><td>BufSz=1 reduces to SingleBD; BufSz&ge;2 enables concurrent decoding of a bounded running-set.</td></tr>
+            <tr><td>Token Merge + Edit</td><td><code>dmax</code></td><td>&mdash;</td><td>Token merge with top-<em>k</em> descriptors plus iterative edit refinement (M2T + T2T).</td></tr>
+            <tr><td>Edit Sampling</td><td>&mdash;</td><td><code>edit</code></td><td>Iterative refinement via edit-based decoding, re-denoising selected spans while keeping the rest fixed.</td></tr>
+            <tr><td>D2F</td><td><code>d2f</code></td><td>&mdash;</td><td>Discrete diffusion forcing for Dream and DiffuCoder model families.</td></tr>
+            <tr><td>Fast-dLLM Dual Cache</td><td><code>fast_dllm_v2</code></td><td>&mdash;</td><td>Dual-cache inference for Fast-dLLM-v2, overlapping KV-cache updates with block decoding.</td></tr>
+            <tr><td>DiffusionGemma</td><td><code>diffusion_gemma</code></td><td>&mdash;</td><td>Native uniform DLM inference with full-sequence denoising for the DiffusionGemma model family.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Supported Models &amp; Strategies</h3>
+      <p>Diffulex ships with first-class support for the following model families and inference strategies. Strategies are selected via <code>decoding_strategy</code> and compose with model-specific samplers, KV cache managers, and schedulers.</p>
+      <div class="table-wrap">
+        <table class="model-table">
+          <thead>
+            <tr>
+              <th scope="col">Model family</th>
+              <th scope="col"><code>model_name</code></th>
+              <th scope="col">Decoding Strategy</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Dream / D2F-Dream</td><td><code>dream</code></td><td><code>d2f</code></td><td>Supported</td></tr>
+            <tr><td>DiffuCoder / D2F-DiffuCoder</td><td><code>diffucoder</code></td><td><code>d2f</code></td><td>Supported</td></tr>
+            <tr><td>Dream reasoner</td><td><code>dream_reasoner</code></td><td><code>multi_bd</code></td><td>Supported</td></tr>
+            <tr><td>Stable-DiffCoder</td><td><code>stable_diffcoder</code></td><td><code>multi_bd</code></td><td>Supported</td></tr>
+            <tr><td>LLaDA / D2F-LLaDA</td><td><code>llada</code></td><td><code>d2f</code></td><td>Supported</td></tr>
+            <tr><td>Fast-dLLM-v2</td><td><code>fast_dllm_v2</code></td><td><code>multi_bd</code> or <code>fast_dllm_v2</code></td><td>Supported</td></tr>
+            <tr><td>SDAR</td><td><code>sdar</code></td><td><code>multi_bd</code></td><td>Supported</td></tr>
+            <tr><td>SDAR-MoE</td><td><code>sdar_moe</code></td><td><code>multi_bd</code></td><td>Supported</td></tr>
+            <tr><td>LLaDA2 family</td><td><code>llada2 / llada2_mini / llada2_moe / llada2dot1_mini</code></td><td><code>multi_bd</code> or <code>dmax</code></td><td>Supported</td></tr>
+            <tr><td>DiffusionGemma</td><td><code>diffusion_gemma</code></td><td><code>diffusion_gemma</code></td><td>Supported</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <div class="grid engine-grid">
-        <div class="card engine-card">
-          <h3>Paradigm coverage</h3>
-          <p>SingleBD, MultiBD, DualCache-style cache behavior, TokenMerge, Edit decoding, and Uniform DLM runtimes can be expressed through strategy-specific request state, schedulers, KV cache managers, model runners, and samplers.</p>
-        </div>
         <div class="card engine-card">
           <h3>Extension-friendly engine</h3>
           <p>The engine separates algorithm semantics from systems concerns such as prefix caching, paged attention, CUDA Graph-friendly execution, batching, benchmarking, and HTTP serving.</p>
@@ -126,14 +172,116 @@
       </div>
     </section>
 
-    <section id="connection">
-      <h2>3. How It Fits Together</h2>
-      <p><strong>mbd-lms</strong> (the training repo) defines MultiTF and produces MBD-LM checkpoints. <strong>Diffulex</strong> (this engine) loads those checkpoints and executes them with MultiBD, Block Buffer, prefix caching, and CUDA Graph support. The two repositories are separate because the method definition and the runtime system have different audiences and development cadences.</p>
-      <div class="engine-actions">
-        <a class="button" href="https://github.com/SJTU-DENG-Lab/mbd-lms">Training Repo (mbd-lms)</a>
-        <a class="button engine" href="https://github.com/SJTU-DENG-Lab/Diffulex/tree/main">Engine Repo (Diffulex)</a>
+    <section id="backend">
+      <h2>3. Single Core Backend, Multiple Main Strategies</h2>
+      <p class="section-lede">The MultiBD block buffer is a single core backend that naturally supports SingleBD, MultiBD, and DualCache-style inference — all through the same fixed-shape, CUDA Graph-friendly pipeline. In Diffulex, the most complex part of adding a new strategy is <strong>modifying the request state machine</strong>. The three core strategies above all involve non-trivial state machine work, yet each fits cleanly within the existing framework.</p>
+
+      <div class="backend-diagrams">
+
+        <div class="backend-card">
+          <div class="backend-diagram">
+            <div class="bd-row">
+              <span class="bd-box bd-prefix">Prefix</span>
+              <span class="bd-buffer bd-buf-1">
+                <span class="bd-buffer-label">Buffer (sz=1)</span>
+                <span class="bd-box bd-active">B₁<br><small>denoising</small></span>
+              </span>
+            </div>
+          </div>
+          <h4>BufSz=1 → SingleBD</h4>
+          <p>Buffer encloses <strong>one block</strong>. Sequential decoding with <strong>static input shape</strong> — CUDA Graph replay works out of the box. The buffer always has the same physical layout regardless of how many blocks have completed.</p>
+        </div>
+
+        <div class="backend-card">
+          <div class="backend-diagram">
+            <div class="bd-row">
+              <span class="bd-box bd-prefix">Prefix</span>
+              <span class="bd-buffer bd-buf-4">
+                <span class="bd-buffer-label">Buffer (sz=4)</span>
+                <span class="bd-box bd-tocache">B₁<br><small>→ cache</small></span>
+                <span class="bd-box bd-active">B₂<br><small>refining</small></span>
+                <span class="bd-box bd-active">B₃<br><small>refining</small></span>
+                <span class="bd-box bd-dummy">B₄<br><small>dummy</small></span>
+              </span>
+            </div>
+          </div>
+          <h4>BufSz&gt;1 → MultiBD</h4>
+          <p>Buffer encloses a <strong>bounded running-set</strong> of consecutive blocks. Earlier blocks complete and wait to enter KV cache while later blocks are already refining. Same static shape, same CUDA Graph path — just a larger <code>buffer_size</code>.</p>
+        </div>
+
+        <div class="backend-card backend-card-wide">
+          <div class="backend-diagram">
+            <div class="bd-row">
+              <span class="bd-box bd-prefix">Prefix</span>
+              <span class="bd-buffer bd-buf-4">
+                <span class="bd-buffer-label">Buffer = FDv2 "block" (sz=4, blksz=8)</span>
+                <span class="bd-box bd-cached">SubB₀<br><small>cached</small></span>
+                <span class="bd-box bd-cached">SubB₁<br><small>cached</small></span>
+                <span class="bd-box bd-cached">SubB₂<br><small>cached</small></span>
+                <span class="bd-box bd-active">SubB₃<br><small>active</small></span>
+              </span>
+              <span class="bd-arrow">→</span>
+              <span class="bd-buffer bd-buf-4">
+                <span class="bd-buffer-label">Next FDv2 block</span>
+                <span class="bd-box bd-dummy">SubB₄<br><small>dummy</small></span>
+                <span class="bd-box bd-dummy">SubB₅<br><small>dummy</small></span>
+                <span class="bd-box bd-dummy">SubB₆<br><small>dummy</small></span>
+                <span class="bd-box bd-dummy">SubB₇<br><small>dummy</small></span>
+              </span>
+            </div>
+            <div class="bd-mapping">
+              <span>Top: FDv2 "block" (32 tokens) → <strong>Block Buffer</strong> (4 blocks × 8 tokens)</span>
+              <span>Inside buffer: FDv2 "sub-block" (8 tokens) → Diffulex <strong>block</strong></span>
+            </div>
+          </div>
+          <h4>DualCache via Buffer Mapping</h4>
+          <p>The original Fast-dLLM-v2 algorithm splits each <strong>32-token block</strong> into four <strong>8-token sub-blocks</strong>. Diffulex maps the FDv2 block to a <strong>Block Buffer</strong> and each sub-block to a <strong>block</strong> inside it. Already-refined SubBs are KV-cached within the buffer; only the active SubB is recomputed. When the buffer is done, it slides to the next FDv2 block. <strong>Three birds, one stone.</strong></p>
+        </div>
+
       </div>
+
+      <h3>How Strategies Map to the Engine</h3>
+      <p>The hardest part of engine development is modifying the <strong>request state machine</strong> — the block lifecycle, buffer management, and step/postprocess transitions. Strategies fall into three tiers based on how deeply they touch this core.</p>
+      <div class="table-wrap">
+        <table class="model-table">
+          <thead>
+            <tr>
+              <th scope="col">Tier</th>
+              <th scope="col">What changes</th>
+              <th scope="col">Strategies</th>
+              <th scope="col">Effort</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>State machine</strong></td>
+              <td>Request FSM, scheduler, model runner, CUDA graphs</td>
+              <td>MultiBD / SingleBD, DualCache (Fast-dLLM-v2), DiffusionGemma</td>
+              <td>Heavy — new block lifecycle, multi-mode graphs</td>
+            </tr>
+            <tr>
+              <td><strong>Sampler only</strong></td>
+              <td>Sampler logic; request FSM and scheduler unchanged</td>
+              <td>Token Merge + Edit (DMax), Edit Sampling / T2T (LLaDA2.1)</td>
+              <td>Light — no state machine changes</td>
+            </tr>
+            <tr>
+              <td><strong>Static parameters</strong></td>
+              <td>Config flags, attention metadata; request FSM unchanged</td>
+              <td>D2F MultiBD, Dream token-shift, SDAR</td>
+              <td>Minimal — a few config fields + sampler override</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>State machine tier.</strong> MultiBD defines the baseline request state machine shared by all strategies: block activation, dummy-slot management, and the decode-store overlap cycle. DualCache (Fast-dLLM-v2) extends this with a <strong>3-mode FSM</strong> — full-buffer init, sub-block refine, and final commit — each requiring its own CUDA graph capture and attention metadata. DiffusionGemma replaces the mask-filling lifecycle entirely with a <strong>canvas-denoising loop</strong>: random-token initialization, entropy-bound stability tracking, and self-conditioning. All three remain within the MultiBD buffer framework despite their complexity.</p>
+
+      <p><strong>Sampler-only tier.</strong> DMax (Token Merge + Edit) and LLaDA2.1 (Edit Sampling / T2T) require <strong>no changes to the request state machine or scheduler</strong>. DMax operates entirely within the sampler: full-block argmax, top-<em>k</em> merge descriptors, and confidence-gated commit — all computed from logits without touching block lifecycle code. DMax's sampler inherits LLaDA2.1's mask-to-token and token-to-token edit transfers, adding merge descriptors on top. The engine pipeline treats these as opaque <code>block_writes</code>.</p>
+
+      <p><strong>Static-parameter tier.</strong> D2F MultiBD requires only two static flags: <code>multi_block_prefix_full=True</code> and prefix caching disabled. These control the attention kernel's visibility window — the rest of the MultiBD backend runs unchanged. Dream and SDAR's token-shift sampling involves a ~30-line sampler subclass with a one-line logit-shift override. DiffusionGemma's attention changes are similarly localized to the model runner's metadata preparation.</p>
     </section>
+
   </main>
 
   <footer>
@@ -145,16 +293,42 @@
     (() => {
       const tocLinks = document.querySelectorAll(".side-toc a");
       const sections = [...tocLinks].map((a) => document.querySelector(a.getAttribute("href")));
+      let activeId = null;
 
       const observer = new IntersectionObserver(
         (entries) => {
+          let topmost = null;
+          let topmostY = Infinity;
           entries.forEach((entry) => {
-            const id = entry.target.getAttribute("id");
-            const link = document.querySelector(`.side-toc a[href="#${id}"]`);
-            if (link) link.classList.toggle("is-visible", entry.isIntersecting);
+            if (entry.isIntersecting && entry.boundingClientRect.top < topmostY) {
+              topmostY = entry.boundingClientRect.top;
+              topmost = entry.target;
+            }
           });
+          if (!topmost) {
+            let best = null, bestY = -Infinity;
+            entries.forEach((entry) => {
+              if (entry.boundingClientRect.bottom <= entry.rootBounds.top && entry.boundingClientRect.bottom > bestY) {
+                bestY = entry.boundingClientRect.bottom;
+                best = entry.target;
+              }
+            });
+            topmost = best;
+          }
+          if (topmost) {
+            const id = topmost.getAttribute("id");
+            if (id !== activeId) {
+              activeId = id;
+              tocLinks.forEach((a) => a.classList.remove("is-visible"));
+              const link = document.querySelector(`.side-toc a[href="#${id}"]`);
+              if (link) {
+                link.classList.add("is-visible");
+                link.scrollIntoView({ block: "nearest", behavior: "smooth" });
+              }
+            }
+          }
         },
-        { rootMargin: "-20% 0px -70% 0px", threshold: 0 }
+        { rootMargin: "-10% 0px -60% 0px", threshold: 0 }
       );
 
       sections.forEach((s) => s && observer.observe(s));
